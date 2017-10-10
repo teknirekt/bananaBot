@@ -1,0 +1,11 @@
+RAIDADD
+	@param (args[0] = raidName) 		STRING
+	@param (args[1] = roleIndex) 		INT
+	@param (args[2] = roleDescription) 	STRING
+	@param (args[3] = discordName) 		STRING (officersOnly, optional)
+
+	Add author of message or user to the raidSignup.
+
+	Example:
+	'~raidAdd trainingRaid 7 CondiSoulbeast'
+	

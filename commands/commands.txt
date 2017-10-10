@@ -1,0 +1,21 @@
+These are the commands I know of:
+
+	Permission: Everyone
+
+	help(commandName)
+	listRaids
+	raidAdd(raid, raidSpot, role)
+	raidFill(raid)
+	raidRemove(raid)
+			
+
+	Permission: Officers
+
+	newRaid(raid)
+	deleteRaid(raid)
+	raidSetup(raid, day, date, time, timezone)
+	raidAdd(raid, raidSpot, role, discordName)
+	raidFill(raid, discordName)
+	raidRemove(raid, discordName)
+
+Note: All commands should be executed using the prefix.

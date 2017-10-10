@@ -1,0 +1,7 @@
+DELETERAID
+	@param (args[0] = raidName)	STRING
+
+	Deletes a raid, given it exists in availableRaids.
+	
+	Example:
+	~deleteRaid trainingRaid

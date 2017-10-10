@@ -1,0 +1,11 @@
+RAIDSETUP
+	@param (args[0] = raidName) STRING
+	@param (args[1] = day)		STRING
+	@param (args[2] = date)		STRING
+	@param (args[3] = time) 	STRING
+	@param (args[4] = timezone) STRING
+
+	Setup a raidSetup message inside the channel, deleting previous message.
+	
+	Example:
+	~raidSetup trainingRaid Sunday 24/12 8pm CEST

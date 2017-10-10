@@ -1,0 +1,14 @@
+{
+  "name": "mybot",
+  "version": "1.0.0",
+  "description": "gw2HelperBot",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "XLOlsen",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^11.2.1",
+  }
+}

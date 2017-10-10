@@ -1,0 +1,7 @@
+NEWRAID
+	@param (args[0] = raidName)	STRING
+
+	Adds a new raid name to available raids.
+	
+	Example:
+	~newRaid trainingRaid
