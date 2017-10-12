@@ -138,13 +138,15 @@ client.on("message", message => {
 			}
 			switch (true) {
 				case ((parseInt(args[1]) >= 1) && (parseInt(args[1]) <= 4) && (raid.roles[args[1]-1] === "")):
-					raid.roles[parseInt(args[1])-1] = userAlreadySigned[1] + "";
+					raid.roles[parseInt(args[1])-1] = userAlreadySigned[1] + ""; //Add user
+					raid.rolesAvailable.splice([raid.rolesAvailable.indexOf(parseInt(args[1]))],1); //Take up a spot
 					UpdateJSON();
 					fetchedMsg.edit(RaidSetupMessage(raid));
 					message.channel.send(userAlreadySigned[1] + ", I signed you up for spot #" + args[1] + " in " + raid.name + ".");
 					break;
 				case ((parseInt(args[1]) >= 5) && (parseInt(args[1]) <= 10) && (raid.roles[args[1]-1] === "")):
-					raid.roles[parseInt(args[1])-1] = userAlreadySigned[1] + " " + args[2];
+					raid.roles[parseInt(args[1])-1] = userAlreadySigned[1] + " " + args[2];//Add user + roleDescription
+					raid.rolesAvailable.splice([raid.rolesAvailable.indexOf(parseInt(args[1]))],1);//Take up a spot
 					UpdateJSON();
 					fetchedMsg.edit(RaidSetupMessage(raid));
 					message.channel.send(userAlreadySigned[1] + ", I signed you up for spot #" + args[1] + " in " + raid.name + ".");
@@ -152,9 +154,14 @@ client.on("message", message => {
 				default:
 					message.channel.send("The desired spot \'" + args[1] + "\' is either already filled, or otherwise unavailable.");
 			}
-		});
+		}).catch(err =>{console.log("RaidAdd:\n" + err)});
 	} else
+	/* ------------------------------ RAIDRESERVE ------------------------------
+	@param (args[0] = raidName) 		STRING
+	@param (args[1] = discordName) 		STRING (optional)
 
+	Add author of message to the raidSignup as shop-up/fill:
+	*/
 
 	/* ------------------------------ RAIDFILL ------------------------------
 	@param (args[0] = raidName) 		STRING
@@ -195,7 +202,7 @@ client.on("message", message => {
 			fetchedMsg.edit(RaidSetupMessage(raid));
 			message.channel.send(userAlreadySigned[1] + ", I've added you to \'" + raid.name + "\' as fill.")
 
-		});
+		}).catch(err =>{console.log("raidFill:\n" + err)});
 	} else
 
 
@@ -230,6 +237,7 @@ client.on("message", message => {
 
 				case (userAlreadySigned[0] === 0): //If user is signed up for a spot
 					raid.roles[userAlreadySigned[2]] = "";
+					raid.rolesAvailable.push(userAlreadySigned[2] + 1);
 					UpdateJSON();
 					fetchedMsg.edit(RaidSetupMessage(raid));
 					message.channel.send(userAlreadySigned[1] + ", I've removed you from spot #" + (userAlreadySigned[2] + 1) + " in \'" + raid.name + "\'.");
@@ -243,7 +251,7 @@ client.on("message", message => {
 					return;
 			}
 
-		});
+		}).catch(err =>{console.log("raidRemove:\n" + err)});
 	} else
 
 
@@ -277,7 +285,9 @@ client.on("message", message => {
 				time: "",
 				timezone: "",
 				roles: ["","","","","","","","","",""],
-				fill: [],
+				rolesAvailable: [1,2,3,4,5,6,7,8,9,10],
+				fill:[],
+				reserve: [],
 				currentSignupMsg: "",
 				channel: ""
 			};
@@ -296,7 +306,7 @@ client.on("message", message => {
 				.fetchMessage(raidData[args[0]].currentSignupMsg).then(fetchedMsg => {
 					message.channel.send("Deleting previous raidSignUp message from channel \'" + raidData[args[0]].channel.id + "\'.")
 				fetchedMsg.delete();
-				});
+				}).catch(err =>{console.log("raidSetup, deletePrevFetchedMsg:\n" + err)});
 		}
 
 		//Make a new raid with given inputs, and all slots empty
@@ -305,6 +315,7 @@ client.on("message", message => {
 		raidData[args[0]].time = args[3];
 		raidData[args[0]].timezone = args[4];
 		raidData[args[0]].roles = ["","","","","","","","","",""];
+		raidData[args[0]].rolesAvailable = [1,2,3,4,5,6,7,8,9,10];
 		raidData[args[0]].fill = [];
 		UpdateJSON();
 
@@ -313,7 +324,7 @@ client.on("message", message => {
 			raidData[args[0]].channel = msg.channel.id;
 			msg.pin();
 			UpdateJSON();
-		});
+		}).catch(err =>{console.log("raidSetup, sendMessage:\n" + err)});
 	} else
 
 
@@ -416,7 +427,7 @@ Make sure to update the token inside /settings.json
 const highRoles = ["Idiotic Leader", "Officers", "Master of Coin"]; 
 
 
-/* ------------------------------ USERINSIGNUPROLES ------------------------------
+/* ------------------------------ USERINSIGNUPFILL ------------------------------
 @Param userToString DISCORDJS.USER.TOSTRING: String representation of a discord user.
 @Param raid JSON.OBJECT: Pass the object raidData[raidName] from raidData.json.
 
@@ -655,8 +666,6 @@ function RaidFillToString(raid) {
 	return result;
 }
 
-
-
 /* ------------------------------ UPDATEJSON ------------------------------
 
 Writes/updates the changes to raidData.json.
@@ -666,3 +675,131 @@ function UpdateJSON() {
 		if (err) console.error(err); //log errors
 	});
 }
+
+
+/**************************************************************************************
+***************************************************************************************
+*************************  TESTING - CODE IN PRODUCTION  ******************************
+***************************************************************************************
+***************************************************************************************/
+
+function numberSort(a,b) {
+    return a - b;
+};
+
+function DefinedInterval(definedInterval) {
+	definedInterval = definedInterval.toLowerCase();
+	switch (definedInterval) {
+		case "chrono":
+			return [1,2];
+			break;
+		case "druid":
+			return [3,4];
+			break;
+		case "ps":
+			return [5,6];
+			break;
+		case "dps":
+			return [7,8,9,10];
+			break;
+		default:
+			return false;
+	}
+}
+
+function AddInterval(intervalString) {
+	var intervalNumbers = [];
+
+	if(intervalString.length>2){
+		return false;
+	}
+	if(!parseInt(intervalString[0]) || !parseInt(intervalString[intervalString.length-1])) {
+		return false;
+	}
+	if(parseInt(intervalString[0]) > parseInt(intervalString[intervalString.length-1])) {
+		return false;
+	}
+
+	for(var i = parseInt(intervalString[0]); i <= parseInt(intervalString[intervalString.length-1]); i++) {
+		intervalNumbers.push(i);
+	}
+
+	return intervalNumbers;
+}
+
+function RemoveDuplicates(numbersArray) {
+	var numbersArrayNoDuplicates = [];
+
+	for(var i = 0; i < numbersArray.length; i++) {
+		if(numbersArray[i] !== numbersArray[i+1]) {
+			numbersArrayNoDuplicates.push(numbersArray[i]);
+		}
+	}
+
+	return numbersArrayNoDuplicates;
+}
+
+function NumbersArrayToIntervalString(numbersArrayNoDuplicates) {
+	var intervalString = "";
+	var x = 0;
+	var y = x;
+
+	for(var i = 0; i < numbersArrayNoDuplicates.length; i++) {
+		if((numbersArrayNoDuplicates[i+1]-numbersArrayNoDuplicates[i]) !== 1) {
+			if(x === y) {
+				intervalString += "[" + numbersArrayNoDuplicates[x] + "], ";
+			} else {
+				intervalString += "[" + numbersArrayNoDuplicates[x] + "-" + numbersArrayNoDuplicates[y] + "], ";
+			}
+			x = i+1;
+			y = x 
+		} else {
+			y = i+1;
+		}
+	}
+
+	return intervalString.slice(0,-2);
+}
+function UpdateAvailableSpotsRec(raid, spot){
+	raid.rolesAvailable.splice([raid.rolesAvailable.indexOf(spot)],1);
+	UpdateJSON();
+	FillPeopleIn(raid);
+}
+
+function FillPeopleIn(raid) {
+	for(var i = 0; i < raid.fill; i++) {}
+}
+
+/*
+node -e 'require("./app.js").test()'
+*/
+module.exports.test = function () {
+var str1 = "[8]";
+var str2 = "dps";
+
+
+if(DefinedInterval(str2)) {
+	var str22 = DefinedInterval(str2);
+} else {
+	var str22 = str2.slice(1,-1).split("-");
+}
+
+var str11 = str1.slice(1,-1).split("-");
+
+console.log(str11 + " " + str22);
+
+var res = AddInterval(str11).concat(str22);
+
+console.log(res);
+
+res.sort(numberSort);
+
+console.log(res);
+
+res = RemoveDuplicates(res);
+console.log(res);
+
+res = NumbersArrayToIntervalString(res);
+console.log(res);
+
+};
