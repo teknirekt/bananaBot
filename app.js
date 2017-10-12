@@ -190,7 +190,7 @@ client.on("message", message => {
 					return;
 			}
 
-			raid.fill.push(userAlreadySigned[1]);
+			raid.fill.push(userAlreadySigned[1].toString());
 			UpdateJSON();
 			fetchedMsg.edit(RaidSetupMessage(raid));
 			message.channel.send(userAlreadySigned[1] + ", I've added you to \'" + raid.name + "\' as fill.")
