@@ -18,7 +18,6 @@ let raidData = JSON.parse(fs.readFileSync("./raidData.json", "utf8"));
 /* Ideas for future versions:
 - Make raidSetup function restrict who's allowed to signup based on an additional argument 
 ex. permission = everyone/officers/guildmembers.
--Add a fill array for raidSetup, signing up for fill using array.push.
 
 - Set channel option
 
@@ -429,7 +428,7 @@ is found, the index is returned. If not, false is returned.
 */
 function UserInSignUpFill(userToString, raid) {
 	for(var i = 0; i < raid.fill.length; i++) {
-		if(raid.fill[i].indexOf(userID) !== -1) {
+		if(raid.fill[i].indexOf(userToString) !== -1) {
 			return i; //If user is in raid.fill list return index i 
 		}
 	}
@@ -449,7 +448,7 @@ is found, the index is returned. If not, false is returned.
 */
 function UserInSignUpRoles(userToString, raid) {
 	for(var i = 0; i < raid.roles.length; i++) {
-		if(raid.roles[i].indexOf(userID) !== -1) {
+		if(raid.roles[i].indexOf(userToString) !== -1) {
 			return i; //If user is in raid.roles list return index i
 		}
 	}
