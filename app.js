@@ -777,6 +777,18 @@ function AddInterval(intervalString) {
 	if(parseInt(intervalString[0]) > parseInt(intervalString[intervalString.length-1])) {
 		return false;
 	}
+	if(parseInt(intervalString[0]) > 10) {
+		return false;
+	}
+	if(parseInt(intervalString[0]) < 1) {
+		return false;
+	}
+	if(parseInt(intervalString[intervalString.length-1]) > 10) {
+		return false;
+	}
+	if(parseInt(intervalString[intervalString.length-1]) < 1) {
+		return false;
+	}
 
 	for(var i = parseInt(intervalString[0]); i <= parseInt(intervalString[intervalString.length-1]); i++) {
 		intervalNumbers.push(i);
@@ -837,6 +849,37 @@ function FillPeopleInRec(raid) {
 	return;
 }
 
+function IntervalStringsToIntervals(intervalStrings){
+	var intervals = [];
+	for(var i = 0; i < intervalStrings.length; i++) {
+		if(DefinedInterval(intervalStrings[i])) {
+			intervals.push(DefinedInterval(intervalStrings[i]));
+		} else if(AddInterval(intervalStrings[i].slice(1,-1).split("-"))){
+			intervals.push(AddInterval(intervalStrings[i].slice(1,-1).split("-")));
+		} else {
+			return intervalStrings[i];
+		}
+	}
+	return intervals;
+}
+
+function IntervalsToFullNumbers(intervals) {
+	if(!AddInterval(intervals[0])) { //Is it a valid interval?
+		return intervals[0];
+	}
+
+	var fullNumbers = intervals[0];
+	for(var i = 1; i < intervals.length; i++) {
+		console.log("Inside loop! " + intervals[i]);
+		fullNumbers = fullNumbers.concat(intervals[i]);//Concatinate all interval arrays
+	}
+
+	fullNumbers.sort(numberSort); // Sort the numbers to prepare for removing duplicates.
+	fullNumbers = RemoveDuplicates(fullNumbers); //Remove duplicates
+
+	return fullNumbers;
+}
+
 /*
 node -e 'require("./app.js").test()'
 */
@@ -844,29 +887,26 @@ module.exports.test = function () {
 var str1 = "[8]";
 var str2 = "dps";
 
+var strArgs = [];
+strArgs.push(str1);
+strArgs.push(str2);
 
-if(DefinedInterval(str2)) {
-	var str22 = DefinedInterval(str2);
-} else {
-	var str22 = str2.slice(1,-1).split("-");
+console.log(strArgs);
+
+strArgs = (IntervalStringsToIntervals(strArgs));
+
+if(typeof(strArgs) === "string") {
+	console.log("\'" + strArgs + "\' is not a valid interval.");
+	return;
 }
 
-var str11 = str1.slice(1,-1).split("-");
+console.log(strArgs);
 
-console.log(str11 + " " + str22);
+strArgs = (IntervalsToFullNumbers(strArgs));
 
-var res = AddInterval(str11).concat(str22);
 
-console.log(res);
+console.log(strArgs);
 
-res.sort(numberSort);
 
-console.log(res);
-
-res = RemoveDuplicates(res);
-console.log(res);
-
-res = NumbersArrayToIntervalString(res);
-console.log(res);
 
 };
