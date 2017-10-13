@@ -25,7 +25,7 @@ ex. permission = everyone/officers/guildmembers.
 */
 
 client.on("ready",() => {
-	console.log("I\'m Online\nI\'m Online")
+	console.log(new Date + "\nI\'m Online\nI\'m Online")
 });
 
 var prefix = "~" //This is the prefix for executing bot commands
@@ -291,10 +291,10 @@ client.on("message", message => {
 
 		} 
 
-		if(raidData[args[0]].channel.id && raidData[args[0]].currentSignupMsg) { //Delete previous signup message.
-			client.channels.get(raidData[args[0]].channel.id)
+		if(raidData[args[0]].channel && raidData[args[0]].currentSignupMsg) { //Delete previous signup message.
+			client.channels.get(raidData[args[0]].channel)
 				.fetchMessage(raidData[args[0]].currentSignupMsg).then(fetchedMsg => {
-					message.channel.send("Deleting previous raidSignUp message from channel \'" + raidData[args[0]].channel.id + "\'.")
+					message.channel.send("Deleting previous raidSignUp message from channel \'" + raidData[args[0]].channel + "\'.")
 				fetchedMsg.delete();
 				});
 		}
