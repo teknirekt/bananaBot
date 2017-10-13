@@ -10,7 +10,7 @@ const deleteRaidTXT = fs.readFileSync("commands/deleteRaid.txt", "utf8");
 const listRaidsTXT = fs.readFileSync("commands/listRaids.txt", "utf8");
 const newRaidTXT = fs.readFileSync("commands/newRaid.txt", "utf8");
 const raidAddTXT = fs.readFileSync("commands/raidAdd.txt", "utf8");
-const raidFillTXT = fs.readFileSync("commands/raidFill.txt", "utf8");
+const raidReservesTXT = fs.readFileSync("commands/raidReserves.txt", "utf8");
 const raidRemoveTXT = fs.readFileSync("commands/raidRemove.txt", "utf8");
 const raidSetupTXT = fs.readFileSync("commands/raidSetup.txt", "utf8");
 
@@ -25,7 +25,7 @@ ex. permission = everyone/officers/guildmembers.
 */
 
 client.on("ready",() => {
-	console.log("I\'m Online\nI\'m Online")
+	console.log(new Date + "\nI\'m Online\nI\'m Online")
 });
 
 var prefix = "~" //This is the prefix for executing bot commands
@@ -84,8 +84,8 @@ client.on("message", message => {
 				message.channel.send(raidAddTXT);
 				break;
 
-			case "raidFill":
-				message.channel.send(raidFillTXT);
+			case "raidReserves":
+				message.channel.send(raidReservesTXT);
 				break;
 
 			case "raidRemove":
@@ -127,30 +127,41 @@ client.on("message", message => {
 			var userAlreadySigned = UserAlreadySignedReport(message, raid, args[3]);
 
 			switch (true) { //Is user already signed up?
+
 				case (userAlreadySigned[0] === 0): //If user is signed up for a spot
 					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
 				 		args[0] + "\', spot #" + (userAlreadySigned[2] + 1));
 					return;
-				case (userAlreadySigned[0] === 1): //If user is signed up to fill
+
+				case (userAlreadySigned[0] === 1): //If user is signed up to reserves
+					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
+						args[0] + "\' as a reserve.");
+					return;
+
+				case (userAlreadySigned[0] === 3): //If user is signed up as fill.
 					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
 						args[0] + "\' as fill.");
 					return;
 			}
+
 			switch (true) {
+
 				case ((parseInt(args[1]) >= 1) && (parseInt(args[1]) <= 4) && (raid.roles[args[1]-1] === "")):
 					raid.roles[parseInt(args[1])-1] = userAlreadySigned[1] + ""; //Add user
-					raid.rolesAvailable.splice([raid.rolesAvailable.indexOf(parseInt(args[1]))],1); //Take up a spot
+					UpdateAvailableSpotsRec(parseInt(args[1]), raid); //Take up spot, and recursively fix reserved spots
 					UpdateJSON();
 					fetchedMsg.edit(RaidSetupMessage(raid));
 					message.channel.send(userAlreadySigned[1] + ", I signed you up for spot #" + args[1] + " in " + raid.name + ".");
 					break;
+
 				case ((parseInt(args[1]) >= 5) && (parseInt(args[1]) <= 10) && (raid.roles[args[1]-1] === "")):
 					raid.roles[parseInt(args[1])-1] = userAlreadySigned[1] + " " + args[2];//Add user + roleDescription
-					raid.rolesAvailable.splice([raid.rolesAvailable.indexOf(parseInt(args[1]))],1);//Take up a spot
+					UpdateAvailableSpotsRec(parseInt(args[1]), raid); //Take up spot, and recursively fix reserved spots
 					UpdateJSON();
 					fetchedMsg.edit(RaidSetupMessage(raid));
 					message.channel.send(userAlreadySigned[1] + ", I signed you up for spot #" + args[1] + " in " + raid.name + ".");
 					break;
+
 				default:
 					message.channel.send("The desired spot \'" + args[1] + "\' is either already filled, or otherwise unavailable.");
 			}
@@ -163,13 +174,13 @@ client.on("message", message => {
 	Add author of message to the raidSignup as shop-up/fill:
 	*/
 
-	/* ------------------------------ RAIDFILL ------------------------------
+	/* ------------------------------ RAIDRESERVE ------------------------------
 	@param (args[0] = raidName) 		STRING
 	@param (args[1] = discordName) 		STRING (optional)
 
-	Add author of message to the raidSignup as shop-up/fill:
+	Add author of message to the raidSignup as shop-up/reserve:
 	*/
-	if(message.content.startsWith(prefix + "raidFill")) {
+	if(message.content.startsWith(prefix + "raidReserves")) {
 
 		var raid = raidExists(args[0]);
 		if(!(raid || (raid === 0))) {
@@ -187,22 +198,29 @@ client.on("message", message => {
 			var userAlreadySigned = UserAlreadySignedReport(message, raid, args[1]);
 
 			switch (true) { //Is user already signed up?
+
 				case (userAlreadySigned[0] === 0): //If user is signed up for a spot
 					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
 				 		args[0] + "\', spot #" + (userAlreadySigned[2] + 1));
 					return;
-				case (userAlreadySigned[0] === 1): //If user is signed up to fill
+
+				case (userAlreadySigned[0] === 1): //If user is signed up as a reserve
+					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
+						args[0] + "\' as a reserve.");
+					return;
+
+				case (userAlreadySigned[0] === 3): //If user is signed up as fill.
 					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
 						args[0] + "\' as fill.");
 					return;
 			}
 
-			raid.fill.push(userAlreadySigned[1].toString());
+			raid.reserves.push(userAlreadySigned[1].toString());
 			UpdateJSON();
 			fetchedMsg.edit(RaidSetupMessage(raid));
-			message.channel.send(userAlreadySigned[1] + ", I've added you to \'" + raid.name + "\' as fill.")
+			message.channel.send(userAlreadySigned[1] + ", I've added you to \'" + raid.name + "\' as a reserve.")
 
-		}).catch(err =>{console.log("raidFill:\n" + err)});
+		}).catch(err =>{console.log("raidReserves:\n" + err)});
 	} else
 
 
@@ -243,12 +261,20 @@ client.on("message", message => {
 					message.channel.send(userAlreadySigned[1] + ", I've removed you from spot #" + (userAlreadySigned[2] + 1) + " in \'" + raid.name + "\'.");
 					return;
 
-				case (userAlreadySigned[0] === 1): //If user is signed up to fill
+				case (userAlreadySigned[0] === 1): //If user is signed up as a reserves
+					raid.reserves.splice(userAlreadySigned[2], 1);
+					UpdateJSON();
+					fetchedMsg.edit(RaidSetupMessage(raid));
+					message.channel.send(userAlreadySigned[1] + ", I've removed you from reserves in \'" + raid.name + "\'.");
+					return;
+
+				case (userAlreadySigned[0] === 3): //If user is signed up as fill
 					raid.fill.splice(userAlreadySigned[2], 1);
 					UpdateJSON();
 					fetchedMsg.edit(RaidSetupMessage(raid));
 					message.channel.send(userAlreadySigned[1] + ", I've removed you from fill in \'" + raid.name + "\'.");
 					return;
+
 			}
 
 		}).catch(err =>{console.log("raidRemove:\n" + err)});
@@ -287,7 +313,7 @@ client.on("message", message => {
 				roles: ["","","","","","","","","",""],
 				rolesAvailable: [1,2,3,4,5,6,7,8,9,10],
 				fill:[],
-				reserve: [],
+				reserves: [],
 				currentSignupMsg: "",
 				channel: ""
 			};
@@ -301,10 +327,10 @@ client.on("message", message => {
 
 		} 
 
-		if(raidData[args[0]].channel.id && raidData[args[0]].currentSignupMsg) { //Delete previous signup message.
-			client.channels.get(raidData[args[0]].channel.id)
+		if(raidData[args[0]].channel && raidData[args[0]].currentSignupMsg) { //Delete previous signup message.
+			client.channels.get(raidData[args[0]].channel)
 				.fetchMessage(raidData[args[0]].currentSignupMsg).then(fetchedMsg => {
-					message.channel.send("Deleting previous raidSignUp message from channel \'" + raidData[args[0]].channel.id + "\'.")
+					message.channel.send("Deleting previous raidSignUp message from channel \'" + raidData[args[0]].channel + "\'.")
 				fetchedMsg.delete();
 				}).catch(err =>{console.log("raidSetup, deletePrevFetchedMsg:\n" + err)});
 		}
@@ -317,6 +343,7 @@ client.on("message", message => {
 		raidData[args[0]].roles = ["","","","","","","","","",""];
 		raidData[args[0]].rolesAvailable = [1,2,3,4,5,6,7,8,9,10];
 		raidData[args[0]].fill = [];
+		raidData[args[0]].reserves = [];
 		UpdateJSON();
 
 		message.channel.send(RaidSetupMessage(raidData[args[0]])).then((msg, msgs) => {
@@ -427,7 +454,7 @@ Make sure to update the token inside /settings.json
 const highRoles = ["Idiotic Leader", "Officers", "Master of Coin"]; 
 
 
-/* ------------------------------ USERINSIGNUPFILL ------------------------------
+/* ------------------------------ USERINSIGNUPRESERVE ------------------------------
 @Param userToString DISCORDJS.USER.TOSTRING: String representation of a discord user.
 @Param raid JSON.OBJECT: Pass the object raidData[raidName] from raidData.json.
 
@@ -437,6 +464,16 @@ const highRoles = ["Idiotic Leader", "Officers", "Master of Coin"];
 Iterates the raid.roles elements in the raid object, searching for the user. If the user
 is found, the index is returned. If not, false is returned.
 */
+function UserInSignUpReserves(userToString, raid) {
+	for(var i = 0; i < raid.reserves.length; i++) {
+		if(raid.reserves[i].indexOf(userToString) !== -1) {
+			return i; //If user is in raid.reserves list return index i 
+		}
+	}
+	return false; //If user was not found in raid.reserves return false
+}
+
+
 function UserInSignUpFill(userToString, raid) {
 	for(var i = 0; i < raid.fill.length; i++) {
 		if(raid.fill[i].indexOf(userToString) !== -1) {
@@ -445,7 +482,6 @@ function UserInSignUpFill(userToString, raid) {
 	}
 	return false; //If user was not found in raid.fill return false
 }
-
 
 /* ------------------------------ USERINSIGNUPROLES ------------------------------
 @Param userToString DISCORDJS.USER.TOSTRING: String representation of a discord user.
@@ -472,28 +508,33 @@ function UserInSignUpRoles(userToString, raid) {
 @Param raid JSON.OBJECT: Pass the object raidData[raidName] from raidData.json.
 @Param username STRING: Pass a valid name or nothing.
 
-@Return resultTrueArray ARRAY[roleOrFill, DISCORDJS.USER, roleOrFillIndex]: 
-Array values depend on if user was in roles or fill, the user passed, and the index
-the user was found at in roles or fill.
+@Return resultTrueArray ARRAY[roleOrReserve, DISCORDJS.USER, roleOrReserveIndex]: 
+Array values depend on if user was in roles or reserve, the user passed, and the index
+the user was found at in roles or reserves.
 @Return resultFalseArray ARRAY[userNotFound=2, DISCORDJS.USER]:
  
 Checks whether the username passed or the message author is already signed up
-as taking a role or filling the raid. If the passed user is found in raid.roles, it will
-be indicated by 0. If passed user is found in raid.fill, it will be indicated by 1.
+as taking a role or being a reserve in the raid. If the passed user is found in raid.roles, it will
+be indicated by 0. If passed user is found in raid.reserves, it will be indicated by 1.
 If passed user is not found, it will be indicated by 2, and the index will not be passed.
 */
 function UserAlreadySignedReport(message, raid, username) {
 
 	var userToAdd = SelfOrAnotherUser(message, username);
 	var userAlreadySignedUpRoles = UserInSignUpRoles(userToAdd, raid);
+	var userAlreadySignedUpReserves = UserInSignUpReserves(userToAdd, raid);
 	var userAlreadySignedUpFill = UserInSignUpFill(userToAdd, raid);
 
 	if(userAlreadySignedUpRoles || userAlreadySignedUpRoles === 0) {
 		return [0, userToAdd, userAlreadySignedUpRoles];
 	}
 	if(userAlreadySignedUpFill || userAlreadySignedUpFill === 0) {
-		return [1, userToAdd, userAlreadySignedUpFill];
+		return [3, userToAdd, userAlreadySignedUpFill]
 	}
+	if(userAlreadySignedUpReserves || userAlreadySignedUpReserves === 0) {
+		return [1, userToAdd, userAlreadySignedUpReserves];
+	}
+
 	return [2, userToAdd];
 }
 
@@ -640,33 +681,50 @@ function RaidSetupMessage(raid) {
 		"10. DPS/Condi DPS \n" + 
 		raid.roles[9] + "\n \n" +
 
-		"Show-ups/fill" +
-		RaidFillToString(raid) + "\n \n" +
+		"Fill:\n\n" +
 
-		"The list has been reset, so please tell me whatever role you'd to fill! \n \n" +
+
+		"Reserves:" +
+		RaidReservesToString(raid) + "\n \n" +
+
+		"The list has been reset, so please tell me whatever role you'd like to fill! \n \n" +
 
 		"If you're not familiar with the bosses please take a look at the guides in #raid-guides. I hope to see you all. Happy raiding!" + 
 		"\n(To sign up use the raidAdd command. Example \'~raidAdd " + raid.name + " 5 CPS\')");
 }
 
 
-/* ------------------------------ RAIDFILLTOSTRING ------------------------------
+/* ------------------------------ RAIDRESERVESTOSTRING ------------------------------
 @Param raid JSON.OBJECT: Pass the object raidData[raidName] from raidData.json.
 
-@Return result STRING: A String representation of raid.fill.
+@Return result STRING: A String representation of raid.reserves.
 
-Iterates the raid.fill data in the raid object adding each element as a string 
+Iterates the raid.reserves data in the raid object adding each element as a string 
 representation.
 */
-function RaidFillToString(raid) {
-	var result = "";
-	for(var i = 0; i < raid.fill.length; i++) {
-		result += "\n" + raid.fill[i]
+function RaidReservesToString(raid){
+	var resultString = "";
+
+	for(var i = 0; i < raid.reserves.length; i++) {
+		resultString += "\n" + raid.reserves[i]
 	}
-	return result;
+
+	return resultString;
 }
 
-/* ------------------------------ UPDATEJSON ------------------------------
+
+
+function RaidFillToString(raid){
+	var resultString = "";
+
+	for(var i = 0; i < raid.fill.length; i++) {
+		resultString += "\n" + raid.fill[i][0] + ": " + raid.fill[i][1]
+	}
+
+	return resultString;
+}
+
+/* ----------------------------- UPDATEJSON ------------------------------
 
 Writes/updates the changes to raidData.json.
 */
@@ -760,14 +818,23 @@ function NumbersArrayToIntervalString(numbersArrayNoDuplicates) {
 
 	return intervalString.slice(0,-2);
 }
-function UpdateAvailableSpotsRec(raid, spot){
+
+function UpdateAvailableSpotsRec(spot, raid){
 	raid.rolesAvailable.splice([raid.rolesAvailable.indexOf(spot)],1);
 	UpdateJSON();
-	FillPeopleIn(raid);
+	FillPeopleInRec(raid);
 }
 
-function FillPeopleIn(raid) {
-	for(var i = 0; i < raid.fill; i++) {}
+function FillPeopleInRec(raid) {
+	for(var i = 0; i < raid.fill; i++) {
+		var intersection = raid.availableRoles.filter(n => raid.fill[i][2].includes(n));
+		if(intersection.length === 1){
+			raid.roles[intersection[0]] = "" + raid.fill[i][0];
+			UpdateJSON();
+			return UpdateAvailableSpotsRec(raid, intersection[0]);
+		}
+	}
+	return;
 }
 
 /*
