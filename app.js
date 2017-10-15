@@ -128,23 +128,18 @@ client.on("message", message => {
 
 			switch (true) { //Is user already signed up?
 
-				case (userAlreadySigned[0] === 0): //If user is signed up for a spot
-					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
-				 		args[0] + "\', spot #" + (userAlreadySigned[2] + 1));
-					return;
-
-				case (userAlreadySigned[0] === 1): //If user is signed up to reserves
+				case (userAlreadySigned[0] === 0): //If user is signed up to reserves
 					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
 						args[0] + "\' as a reserve.");
 					return;
 
-				case (userAlreadySigned[0] === 3): //If user is signed up as fill.
+				case (userAlreadySigned[0] === 1): //If user is signed up in list
 					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
-						args[0] + "\' as fill.");
+						args[0] + "\' at a specified spot or as a fill.");
 					return;
 			}
 
-			if(raid.spotsLeft < 1) {
+			if(raid.rolesAvailable.length === 0) {
 				message.channel.send(message.author + ", I'm sorry I couldn't sign you up, as there are no more spots left.\n" +
 					"Sign up as a reserve using \'~raidReserves " + raid.name + "\', or ask an officer to open up another raid.");
 				return;
@@ -173,6 +168,8 @@ client.on("message", message => {
 			}
 		}).catch(err =>{console.log("RaidAdd:\n" + err)});
 	} else
+
+
 	/* ------------------------------ RAIDRESERVE ------------------------------
 	@param (args[0] = raidName) 		STRING
 	@param (args[1] = discordName) 		STRING (optional)
@@ -383,10 +380,8 @@ client.on("message", message => {
 				date: "",
 				time: "",
 				timezone: "",
-				roles: ["","","","","","","","","",""],
 				rolesAvailable: [1,2,3,4,5,6,7,8,9,10],
-				spotsLeft: 10,
-				fill:[],
+				signUpGraph: [],
 				reserves: [],
 				currentSignupMsg: "",
 				channel: ""
@@ -415,10 +410,8 @@ client.on("message", message => {
 		raidData[args[0]].date = args[2];
 		raidData[args[0]].time = args[3];
 		raidData[args[0]].timezone = args[4];
-		raidData[args[0]].roles = ["","","","","","","","","",""];
 		raidData[args[0]].rolesAvailable = [1,2,3,4,5,6,7,8,9,10];
-		raidData[args[0]].spotsLeft = 10;
-		raidData[args[0]].fill = [];
+		raidData[args[0]].signUpGraph = new SignUpGraph();
 		raidData[args[0]].reserves = [];
 		UpdateJSON();
 
@@ -534,10 +527,10 @@ const highRoles = ["Idiotic Leader", "Officers", "Master of Coin"];
 @Param userToString DISCORDJS.USER.TOSTRING: String representation of a discord user.
 @Param raid JSON.OBJECT: Pass the object raidData[raidName] from raidData.json.
 
-@Return result INT: (true) Index of found user in raid.roles.
+@Return result INT: (true) Index of found user in raid.reserves.
 @Return result BOOLEAN: false.
 
-Iterates the raid.roles elements in the raid object, searching for the user. If the user
+Iterates the raid.reserves elements in the raid object, searching for the user. If the user
 is found, the index is returned. If not, false is returned.
 */
 function UserInSignUpReserves(userToString, raid) {
@@ -550,36 +543,17 @@ function UserInSignUpReserves(userToString, raid) {
 }
 
 
-function UserInSignUpFill(userToString, raid) {
-	for(var i = 0; i < raid.fill.length; i++) {
-		if(raid.fill[i][0].indexOf(userToString) !== -1) {
-			return i; //If user is in raid.fill list return index i 
+function UserInSignUpList(userToString, raid) {
+	for (var i = 1; i < raid.signUpGraph.length; i++) {
+		if(raid.signUpGraph[i].discordID === userToString) {
+			return i; //If user is in the signUpGraph list return index i 
 		}
 	}
-	return false; //If user was not found in raid.fill return false
-}
-
-/* ------------------------------ USERINSIGNUPROLES ------------------------------
-@Param userToString DISCORDJS.USER.TOSTRING: String representation of a discord user.
-@Param raid JSON.OBJECT: Pass the object raidData[raidName] from raidData.json.
-
-@Return result INT: (true) Index of found user in raid.roles.
-@Return result BOOLEAN: false.
-
-Iterates the raid.roles elements in the raid object, searching for the user. If the user
-is found, the index is returned. If not, false is returned.
-*/
-function UserInSignUpRoles(userToString, raid) {
-	for(var i = 0; i < raid.roles.length; i++) {
-		if(raid.roles[i].indexOf(userToString) !== -1) {
-			return i; //If user is in raid.roles list return index i
-		}
-	}
-	return false; //If user was not found in raid.roles return false
+	return false; //If user was not found in signUpGraph list return false
 }
 
 
-/* ------------------------------ USERALREADYSIGNEDUPREPORT ------------------------------
+/* ----------------------- USERALREADYSIGNEDUPREPORT ------------------------
 @Param message DISCORDJS.MESSAGE: Pass the message that prompted the command.
 @Param raid JSON.OBJECT: Pass the object raidData[raidName] from raidData.json.
 @Param username STRING: Pass a valid name or nothing.
@@ -597,18 +571,14 @@ If passed user is not found, it will be indicated by 2, and the index will not b
 function UserAlreadySignedReport(message, raid, username) {
 
 	var userToAdd = SelfOrAnotherUser(message, username);
-	var userAlreadySignedUpRoles = UserInSignUpRoles(userToAdd, raid);
-	var userAlreadySignedUpReserves = UserInSignUpReserves(userToAdd, raid);
-	var userAlreadySignedUpFill = UserInSignUpFill(userToAdd, raid);
+	var userAlreadyInReserves = UserInSignUpReserves(userToAdd, raid);
+	var userAlreadyInList = UserInSignUpList(userToAdd, raid);
 
-	if(userAlreadySignedUpRoles || userAlreadySignedUpRoles === 0) {
-		return [0, userToAdd, userAlreadySignedUpRoles];
-	}
-	if(userAlreadySignedUpFill || userAlreadySignedUpFill === 0) {
-		return [3, userToAdd, userAlreadySignedUpFill]
-	}
 	if(userAlreadySignedUpReserves || userAlreadySignedUpReserves === 0) {
-		return [1, userToAdd, userAlreadySignedUpReserves];
+		return [0, userToAdd, userAlreadySignedUpReserves];
+	}
+	if(userAlreadyInList || userAlreadyInList === 0) {
+		return [1, userToAdd, userAlreadyInList]
 	}
 
 	return [2, userToAdd];
@@ -726,40 +696,36 @@ Inserts info from the raid object into a String template.
 function RaidSetupMessage(raid) {
 	return ("raidSetup: " + raid.name + " \n" +
 		"\@everyone \n" +
-		raid.day + " " + raid.date + " (" + raid.time + " " + raid.timezone + ")" + "\n" +
+		raid.day + " " + raid.date + " (" + raid.time + " " + raid.timezone + ")\n" +
 		"1. Chronotank \n" +
-		raid.roles[0] + "\n \n" +
+		raid.signUpGraph[1].discordID + " (" + raid.signUpGraph[1].flavorText + ")\n \n" +
 
 		"2. Support Chrono \n" + 
-		raid.roles[1] + "\n \n" +
+		raid.signUpGraph[2].discordID + " (" + raid.signUpGraph[2].flavorText + ")\n \n" +
 
 		"3. Druid \n" + 
-		raid.roles[2] + "\n \n" +
+		raid.signUpGraph[3].discordID + " (" + raid.signUpGraph[3].flavorText + ")\n \n" +
 
 		"4. Druid \n" + 
-		raid.roles[3] + "\n \n" +
+		raid.signUpGraph[4].discordID + " (" + raid.signUpGraph[4].flavorText + ")\n \n" +
 
 		"5. PS \n" + 
-		raid.roles[4] + "\n \n" +
+		raid.signUpGraph[5].discordID + " (" + raid.signUpGraph[5].flavorText + ")\n \n" +
 
 		"6. PS \n" + 
-		raid.roles[5] + "\n \n" + 
+		raid.signUpGraph[6].discordID + " (" + raid.signUpGraph[6].flavorText + ")\n \n" +
 
 		"7. DPS/Condi DPS \n" + 
-		raid.roles[6] + "\n \n" + 
+		raid.signUpGraph[7].discordID + " (" + raid.signUpGraph[7].flavorText + ")\n \n" +
 
 		"8. DPS/Condi DPS \n" + 
-		raid.roles[7] + "\n \n" + 
+		raid.signUpGraph[8].discordID + " (" + raid.signUpGraph[8].flavorText + ")\n \n" +
 
 		"9. DPS/Condi DPS \n" + 
-		raid.roles[8] + "\n \n" + 
+		raid.signUpGraph[9].discordID + " (" + raid.signUpGraph[9].flavorText + ")" "\n \n" + 
 
 		"10. DPS/Condi DPS \n" + 
-		raid.roles[9] + "\n \n" +
-
-		"Fill:" + 
-		RaidFillToString(raid) + "\n \n" +
-
+		raid.signUpGraph[10].discordID + " (" + raid.signUpGraph[10].flavorText + ")\n \n" +
 
 		"Reserves:" +
 		RaidReservesToString(raid) + "\n \n" +
@@ -821,7 +787,14 @@ function UpdateJSON() {
 function numberSort(a, b) {
     return a - b;
 };
+/*
 
+
+Interval parsing from strings
+
+
+*/
+//Turns "chrono", "druid", "ps", "dps", "all" => [1,2], [3,4], [5,6], [7,10], [1,10]
 function DefinedInterval(definedInterval) {
 	definedInterval = definedInterval.toLowerCase();
 	switch (definedInterval) {
@@ -849,7 +822,22 @@ function DefinedInterval(definedInterval) {
 			return false;
 	}
 }
+//Turns "[7-10]" or "dps" => [7,10] 
+function IntervalStringsToIntervals(intervalStrings){
+	var intervals = [];
+	for(var i = 0; i < intervalStrings.length; i++) {
+		if(DefinedInterval(intervalStrings[i])) {
+			intervals.push(DefinedInterval(intervalStrings[i]));
+		} else if(AddInterval(intervalStrings[i].slice(1,-1).split("-"))){
+			intervals.push(AddInterval(intervalStrings[i].slice(1,-1).split("-")));
+		} else {
+			return intervalStrings[i];
+		}
+	}
+	return intervals;
+}
 
+//Turns [1,5] => [1, 2, 3, 4, 5]
 function AddInterval(intervalString) {
 	var intervalNumbers = [];
 
@@ -882,6 +870,7 @@ function AddInterval(intervalString) {
 	return intervalNumbers;
 }
 
+//Turns [1, 1, 2, 3, 4, 4, 5] => [1, 2, 3, 4, 5]
 function RemoveDuplicates(numbersArray) {
 	var numbersArrayNoDuplicates = [];
 
@@ -894,6 +883,7 @@ function RemoveDuplicates(numbersArray) {
 	return numbersArrayNoDuplicates;
 }
 
+//Turns [1, 2, 3, 4, 5] => "[1-5]"
 function NumbersArrayToIntervalString(numbersArrayNoDuplicates) {
 	var intervalString = "";
 	var x = 0;
@@ -916,47 +906,15 @@ function NumbersArrayToIntervalString(numbersArrayNoDuplicates) {
 	return intervalString.slice(0,-2);
 }
 
-function UpdateAvailableSpotsRec(spot, raid){
-	raid.rolesAvailable.splice([raid.rolesAvailable.indexOf(spot)], 1);
-	FillPeopleInRec(raid);
-}
-
-function FillPeopleInRec(raid) {
-	for(var i = 0; i < raid.fill.length; i++) {
-		var intersection = Intersect(raid.rolesAvailable, raid.fill[i][1]);
-		if(intersection.length === 1){
-			raid.roles[intersection[0]-1] = "" + raid.fill[i][0];
-			raid.fill.splice(i, 1);
-			return UpdateAvailableSpotsRec(intersection[0], raid);
-		}
-	}
-	UpdateJSON();
-	return;
-}
-
-function IntervalStringsToIntervals(intervalStrings){
-	var intervals = [];
-	for(var i = 0; i < intervalStrings.length; i++) {
-		if(DefinedInterval(intervalStrings[i])) {
-			intervals.push(DefinedInterval(intervalStrings[i]));
-		} else if(AddInterval(intervalStrings[i].slice(1,-1).split("-"))){
-			intervals.push(AddInterval(intervalStrings[i].slice(1,-1).split("-")));
-		} else {
-			return intervalStrings[i];
-		}
-	}
-	return intervals;
-}
-
+//Turns ["[7-10]", "[5-8]"] => [7, 8, 9, 10, 5, 6, 7, 8] => [5, 6, 7, 8, 9, 10]
 function IntervalsToFullNumbers(intervals) {
 	if(!AddInterval(intervals[0])) { //Is it a valid interval?
 		return intervals[0];
 	}
 
-	var fullNumbers = intervals[0];
+	var fullNumbers = AddInterval(intervals[0]);
 	for(var i = 1; i < intervals.length; i++) {
-		console.log("Inside loop! " + intervals[i]);
-		fullNumbers = fullNumbers.concat(intervals[i]);//Concatinate all interval arrays
+		fullNumbers = fullNumbers.concat(AddInterval(intervals[i]));//Concatinate all interval arrays
 	}
 
 	fullNumbers.sort(numberSort); // Sort the numbers to prepare for removing duplicates.
@@ -971,6 +929,153 @@ function Intersect(a, b) {
     return a.filter(function (e) {
         return b.indexOf(e) !== -1;
     });
+}
+
+/*
+
+
+Graph creation and manipulation
+
+
+*/
+
+function Vertex(spot, adjecentEdges) { //Own implementation
+	this.spot = spot;
+	this.discordID = "";
+	this.flavorText = "";
+	this.adjecentEdges = adjecentEdges;
+	this.color = undefined;
+	this.distance = undefined;
+	this.parent = undefined;
+}
+
+function SignUpGraph() {//Own graph implementation specific to signUpList problem
+	var graph = [new Vertex(0, [0])];
+	for(var i = 1; i < 11; i++) {
+		graph.push(new Vertex(i, [i]));
+	}
+	return graph;
+}
+
+function SetSourceVertex(Graph, adjEdges, id, text) {
+	Graph[0].adjecentEdges = adjEdges;
+	Graph[0].discordID = id;
+	Graph[0].flavorText = text;
+}
+
+function BFS(Graph, source) { //[CLRS] 22.2, page 595, Pseudo code implementation
+	for(var i = 1; i < (Graph.length); i++) {
+		Graph[i].color = "white";
+		Graph[i].distance = Infinity;
+		Graph[i].parent = null;
+	}
+
+	source.color = "gray";
+	source.distance = 0;
+	source.parent = null;
+
+	var queue = new Queue();
+	queue.Enqueue(source);
+
+	while(!queue.IsEmpty()) {
+		var u = queue.Dequeue(); //Vertex u is the next element in the Queue
+		for (var i = 0; i < u.adjecentEdges.length; i++) {
+			if(Graph[(u.adjecentEdges[i])].color === "white") {
+				Graph[(u.adjecentEdges[i])].color = "gray";
+				Graph[(u.adjecentEdges[i])].distance = (u.distance + 1);
+				Graph[(u.adjecentEdges[i])].parent = u;
+				queue.Enqueue(Graph[(u.adjecentEdges[i])]);
+			}
+		}
+		u.color = "black"
+	}
+}
+
+function EmptySpotReachable(Graph, emptySpots) {
+	for (var i = 0; i < emptySpots.length; i++) {
+		if(Graph[emptySpots[i]].parent) {
+			return Graph[emptySpots[i]];
+		}
+	}
+	return false;
+}
+
+function CopyVertexInfo(v1, v2) {
+	v2.discordID = v1.discordID;
+	v2.adjecentEdges = v1.adjecentEdges;
+}
+
+function PlaceSourceInList(Graph, emptySpotWithinReach){
+	if(!emptySpotWithinReach.parent) {
+		SetSourceVertex([0], null);
+		return;
+	}
+	CopyVertexInfo(emptySpotWithinReach.parent, emptySpotWithinReach);
+	PlaceSourceInList(Graph, emptySpotWithinReach.parent);
+	return;
+}
+
+/*
+
+
+Queue creation and manipulation
+
+
+*/
+
+
+function Queue() {
+	this.head = 0;
+	this.tail = 0;
+	this.qArray = [undefined, undefined, undefined, undefined, undefined,
+		undefined, undefined, undefined, undefined, undefined]; 
+		//We will at most have 10 vertices in our queue
+}
+
+Queue.prototype.Enqueue = function(x) {
+	if(this.IsFull()) {
+		throw new Error("Queue overflow. \n" +
+			"Head: " + this.head + ", Tail: " + this.tail + ", qLength: " + this.qArray.length);
+	}
+
+	this.qArray[this.tail] = x;
+	if(this.tail === this.length) {
+		this.tail = 0;
+	} else {
+		this.tail++;
+	}
+}
+
+Queue.prototype.Dequeue = function() {
+	if(this.IsEmpty()) {
+		throw new Error("Queue underflow. \n" +
+			"Head: " + this.head + ", Tail: " + this.tail + ", qLength: " + this.qArray.length);
+	}
+
+	x = this.qArray[this.head];
+	if(this.head === this.length) {
+		this.head = 0;
+	} else {
+		this.head++;
+	}
+	return x;
+}
+
+Queue.prototype.IsFull = function() {
+	if((this.head === (this.tail + 1)) || 
+		((this.head === 0) && (this.tail === this.qArray.length))) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+Queue.prototype.IsEmpty = function() {
+	if(this.head === this.tail) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
 
