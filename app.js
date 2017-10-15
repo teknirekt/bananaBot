@@ -2,6 +2,7 @@ const Discord = require("discord.js");
 const client = new Discord.Client();
 const token = require("./settings.json").token;
 const fs = require("fs");
+const util = require('util');
 
 //Following are all the help command txt's as variables.
 const infoTXT = fs.readFileSync("commands/info.txt", "utf8");
@@ -145,38 +146,42 @@ client.on("message", message => {
 				return;
 			}
 
-			switch (true) {
+			if(isNaN(parseInt(args[1])) || ((parseInt(args[1]) < 1) || (parseInt(args[1]) > 10))){
+				message.channel.send(message.author + ", \'" + args[1] + "\' is not a valid spot index.");
+				return;
+			}
 
-				case ((parseInt(args[1]) >= 1) && (parseInt(args[1]) <= 4) && (raid.roles[args[1]-1] === "")):
-					raid.roles[parseInt(args[1])-1] = userAlreadySigned[1] + ""; //Add user
-					raid.spotsLeft--;
-					UpdateAvailableSpotsRec(parseInt(args[1]), raid); //Take up spot, and recursively fix reserved spots
-					fetchedMsg.edit(RaidSetupMessage(raid));
-					message.channel.send(userAlreadySigned[1] + ", I signed you up for spot #" + args[1] + " in " + raid.name + ".");
-					break;
+			SetSourceVertex(raid.signUpGraph, [parseInt(args[1])], userAlreadySigned[1], args[2]);
+			BFS(raid.signUpGraph, raid.signUpGraph[0]);
+			UpdateJSON();
 
-				case ((parseInt(args[1]) >= 5) && (parseInt(args[1]) <= 10) && (raid.roles[args[1]-1] === "")):
-					raid.roles[parseInt(args[1])-1] = userAlreadySigned[1] + " " + args[2];//Add user + roleDescription
-					raid.spotsLeft--;
-					UpdateAvailableSpotsRec(parseInt(args[1]), raid); //Take up spot, and recursively fix reserved spots
-					fetchedMsg.edit(RaidSetupMessage(raid));
-					message.channel.send(userAlreadySigned[1] + ", I signed you up for spot #" + args[1] + " in " + raid.name + ".");
-					break;
+			var switchVertex = EmptySpotReachable(raid.signUpGraph, raid.rolesAvailable);
+			if(switchVertex) {
+				PlaceSourceInList(raid.signUpGraph, switchVertex);
+				raid.rolesAvailable.splice(raid.rolesAvailable.indexOf(switchVertex.spot), 1);
+				UpdateJSON();
 
-				default:
-					message.channel.send("The desired spot \'" + args[1] + "\' is either already filled, or otherwise unavailable.");
+				fetchedMsg.edit(RaidSetupMessage(raid));
+				message.channel.send(userAlreadySigned[1] + ", I've signed you up for spot #" + args[1] 
+					+ " in \'" + raid.name + "\'.");
+			} else {
+				SetSourceVertex(raid.signUpGraph, [0], "", "");
+				UpdateJSON();
+				message.channel.send(userAlreadySigned[1] + ", I'm sorry. I couldn't sign you up for spot #" + args[1] + " in \'" +
+					raid.name + "\', as it's currently taken.");
 			}
 		}).catch(err =>{console.log("RaidAdd:\n" + err)});
 	} else
 
 
-	/* ------------------------------ RAIDRESERVE ------------------------------
+	/* ------------------------------ RAIDFILL ------------------------------
 	@param (args[0] = raidName) 		STRING
 	@param (args[1] = discordName) 		STRING (optional)
 
 	Add author of message to the raidSignup as shop-up/fill:
 	*/
 	if(message.content.startsWith(prefix + "raidFill")) {
+		
 		var raid = raidExists(args[0]);
 		if(!(raid || (raid === 0))) {
 			message.channel.send("There currently is no signup for this raid: " + args[0]);
@@ -184,60 +189,68 @@ client.on("message", message => {
 		}
 		raid = raidData[args[0]];
 
-		var stringIntervals = args.slice(1);
-
-		if(!stringIntervals || stringIntervals.length === 0) {
-			message.channel.send("Please add intervals/spots you'd like to fill.");
-			return;
-		}
-
-		stringIntervals = (IntervalStringsToIntervals(stringIntervals));
-
-		if(typeof(stringIntervals) === "string") {
-			message.channel.send("\'" + stringIntervals + "\' is not a valid interval.\n" +
-				"Examples of valid intervals: [1-3], [6], chrono, druid, ps, dps, all\n" +
-				"Remember to seperate intervals by spaces, example: [1-5] [8]");
-			return;
-		}
-
-		stringIntervals = (IntervalsToFullNumbers(stringIntervals));
-
 		message.channel.fetchMessage(raid.currentSignupMsg).then(fetchedMsg => {
-	
 			var userAlreadySigned = UserAlreadySignedReport(message, raid, false);
 
 			switch (true) { //Is user already signed up?
 
-				case (userAlreadySigned[0] === 0): //If user is signed up for a spot
-					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
-				 		args[0] + "\', spot #" + (userAlreadySigned[2] + 1));
-					return;
-
-				case (userAlreadySigned[0] === 1): //If user is signed up to reserves
+				case (userAlreadySigned[0] === 0): //If user is signed up to reserves
 					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
 						args[0] + "\' as a reserve.");
 					return;
 
-				case (userAlreadySigned[0] === 3): //If user is signed up as fill.
+				case (userAlreadySigned[0] === 1): //If user is signed up in list
 					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
-						args[0] + "\' as fill.");
+						args[0] + "\' at a specified spot or as a fill.");
 					return;
 			}
 
-			if(raid.spotsLeft < 1) {
+			if(raid.rolesAvailable.length === 0) {
 				message.channel.send(message.author + ", I'm sorry I couldn't sign you up, as there are no more spots left.\n" +
 					"Sign up as a reserve using \'~raidReserves " + raid.name + "\', or ask an officer to open up another raid.");
 				return;
 			}
 
+			var stringIntervals = args.slice(1);
+
+			if(!stringIntervals || stringIntervals.length === 0) {
+				message.channel.send("Please add intervals/spots you'd like to fill.");
+				return;
+			}
+
+			stringIntervals = (IntervalStringsToIntervals(stringIntervals));
+
+			if(typeof(stringIntervals) === "string") {
+				message.channel.send("\'" + stringIntervals + "\' is not a valid interval.\n" +
+					"Examples of valid intervals: [1-3], [6], chrono, druid, ps, dps, all");
+				return;
+			}
+
+			stringIntervals = (IntervalsToFullNumbers(stringIntervals));
+
 			var backToIntervalStrings = NumbersArrayToIntervalString(stringIntervals)
 
-			raid.fill.push([userAlreadySigned[1].toString(), stringIntervals, backToIntervalStrings]);
-			raid.spotsLeft--;
-			FillPeopleInRec(raid);
-			fetchedMsg.edit(RaidSetupMessage(raid));
-			message.channel.send(userAlreadySigned[1] + ", I've added you to \'" + args[0] 
-				+ "\' as fill in spots: \n" + backToIntervalStrings);
+			SetSourceVertex(raid.signUpGraph, stringIntervals,
+				userAlreadySigned[1].toString(), backToIntervalStrings);
+
+			BFS(raid.signUpGraph, raid.signUpGraph[0]);
+			UpdateJSON();
+
+			var switchVertex = EmptySpotReachable(raid.signUpGraph, raid.rolesAvailable);
+			if(switchVertex) {
+				PlaceSourceInList(raid.signUpGraph, switchVertex);
+				raid.rolesAvailable.splice(raid.rolesAvailable.indexOf(switchVertex.spot), 1);
+				UpdateJSON();
+
+				fetchedMsg.edit(RaidSetupMessage(raid));
+				message.channel.send(userAlreadySigned[1] + ", I've signed you up in \'" + raid.name + 
+					"\', as fill for spots: " + backToIntervalStrings);
+			} else {
+				SetSourceVertex(raid.signUpGraph, [0], "", "");
+				UpdateJSON();
+				message.channel.send(userAlreadySigned[1] + ", I'm sorry. I couldn't sign you up in \'" + raid.name + 
+					"\', as fill for spots: (" + backToIntervalStrings + "), as they're currently taken.");
+			}
 		}).catch(err => {console.log(err)});
 	}
 
@@ -258,28 +271,21 @@ client.on("message", message => {
 		raid = raidData[args[0]];
 
 		message.channel.fetchMessage(raid.currentSignupMsg).then(fetchedMsg => {
-
 			if(!CanFindAndManageUser(message, args[1])) { //Is messageAuthor allowed to add 
 				return; //other users and is it a valid username?
 			}
-
 			var userAlreadySigned = UserAlreadySignedReport(message, raid, args[1]);
 
 			switch (true) { //Is user already signed up?
 
-				case (userAlreadySigned[0] === 0): //If user is signed up for a spot
-					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
-				 		args[0] + "\', spot #" + (userAlreadySigned[2] + 1));
-					return;
-
-				case (userAlreadySigned[0] === 1): //If user is signed up as a reserve
+				case (userAlreadySigned[0] === 0): //If user is signed up to reserves
 					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
 						args[0] + "\' as a reserve.");
 					return;
 
-				case (userAlreadySigned[0] === 3): //If user is signed up as fill.
+				case (userAlreadySigned[0] === 1): //If user is signed up in list
 					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
-						args[0] + "\' as fill.");
+						args[0] + "\' at a specified spot or as a fill.");
 					return;
 			}
 
@@ -321,28 +327,19 @@ client.on("message", message => {
 
 			switch (true) { //Is user already signed up?
 
-				case (userAlreadySigned[0] === 0): //If user is signed up for a spot
-					raid.roles[userAlreadySigned[2]] = "";
-					raid.rolesAvailable.push(userAlreadySigned[2] + 1);
-					raid.spotsLeft++;
-					UpdateJSON();
-					fetchedMsg.edit(RaidSetupMessage(raid));
-					message.channel.send(userAlreadySigned[1] + ", I've removed you from spot #" + (userAlreadySigned[2] + 1) + " in \'" + raid.name + "\'.");
-					return;
-
-				case (userAlreadySigned[0] === 1): //If user is signed up as a reserves
+				case (userAlreadySigned[0] === 0): //If user is signed up for reserves
 					raid.reserves.splice(userAlreadySigned[2], 1);
 					UpdateJSON();
 					fetchedMsg.edit(RaidSetupMessage(raid));
 					message.channel.send(userAlreadySigned[1] + ", I've removed you from reserves in \'" + raid.name + "\'.");
 					return;
 
-				case (userAlreadySigned[0] === 3): //If user is signed up as fill
-					raid.fill.splice(userAlreadySigned[2], 1);
-					raid.spotsLeft++;
+				case (userAlreadySigned[0] === 1): //If user is signed up as a reserves
+					raid.signUpGraph[userAlreadySigned[2]] = new Vertex(userAlreadySigned[2], [userAlreadySigned[2]]);
+					raid.rolesAvailable.push(userAlreadySigned[2]);
 					UpdateJSON();
 					fetchedMsg.edit(RaidSetupMessage(raid));
-					message.channel.send(userAlreadySigned[1] + ", I've removed you from fill in \'" + raid.name + "\'.");
+					message.channel.send(userAlreadySigned[1] + ", I've removed you from spot #" + userAlreadySigned[2] + " in \'" + raid.name + "\'.");
 					return;
 
 			}
@@ -570,12 +567,12 @@ If passed user is not found, it will be indicated by 2, and the index will not b
 */
 function UserAlreadySignedReport(message, raid, username) {
 
-	var userToAdd = SelfOrAnotherUser(message, username);
+	var userToAdd = SelfOrAnotherUser(message, username).toString();
 	var userAlreadyInReserves = UserInSignUpReserves(userToAdd, raid);
 	var userAlreadyInList = UserInSignUpList(userToAdd, raid);
 
-	if(userAlreadySignedUpReserves || userAlreadySignedUpReserves === 0) {
-		return [0, userToAdd, userAlreadySignedUpReserves];
+	if(userAlreadyInReserves || userAlreadyInReserves === 0) {
+		return [0, userToAdd, userAlreadyInReserves];
 	}
 	if(userAlreadyInList || userAlreadyInList === 0) {
 		return [1, userToAdd, userAlreadyInList]
@@ -696,36 +693,36 @@ Inserts info from the raid object into a String template.
 function RaidSetupMessage(raid) {
 	return ("raidSetup: " + raid.name + " \n" +
 		"\@everyone \n" +
-		raid.day + " " + raid.date + " (" + raid.time + " " + raid.timezone + ")\n" +
+		raid.day + " " + raid.date + " " + raid.time + " " + raid.timezone + "\n" +
 		"1. Chronotank \n" +
-		raid.signUpGraph[1].discordID + " (" + raid.signUpGraph[1].flavorText + ")\n \n" +
+		raid.signUpGraph[1].discordID + " " + raid.signUpGraph[1].flavorText + "\n \n" +
 
 		"2. Support Chrono \n" + 
-		raid.signUpGraph[2].discordID + " (" + raid.signUpGraph[2].flavorText + ")\n \n" +
+		raid.signUpGraph[2].discordID + " " + raid.signUpGraph[2].flavorText + "\n \n" +
 
 		"3. Druid \n" + 
-		raid.signUpGraph[3].discordID + " (" + raid.signUpGraph[3].flavorText + ")\n \n" +
+		raid.signUpGraph[3].discordID + " " + raid.signUpGraph[3].flavorText + "\n \n" +
 
 		"4. Druid \n" + 
-		raid.signUpGraph[4].discordID + " (" + raid.signUpGraph[4].flavorText + ")\n \n" +
+		raid.signUpGraph[4].discordID + " " + raid.signUpGraph[4].flavorText + "\n \n" +
 
 		"5. PS \n" + 
-		raid.signUpGraph[5].discordID + " (" + raid.signUpGraph[5].flavorText + ")\n \n" +
+		raid.signUpGraph[5].discordID + " " + raid.signUpGraph[5].flavorText + "\n \n" +
 
 		"6. PS \n" + 
-		raid.signUpGraph[6].discordID + " (" + raid.signUpGraph[6].flavorText + ")\n \n" +
+		raid.signUpGraph[6].discordID + " " + raid.signUpGraph[6].flavorText + "\n \n" +
 
 		"7. DPS/Condi DPS \n" + 
-		raid.signUpGraph[7].discordID + " (" + raid.signUpGraph[7].flavorText + ")\n \n" +
+		raid.signUpGraph[7].discordID + " " + raid.signUpGraph[7].flavorText + "\n \n" +
 
 		"8. DPS/Condi DPS \n" + 
-		raid.signUpGraph[8].discordID + " (" + raid.signUpGraph[8].flavorText + ")\n \n" +
+		raid.signUpGraph[8].discordID + " " + raid.signUpGraph[8].flavorText + "\n \n" +
 
 		"9. DPS/Condi DPS \n" + 
-		raid.signUpGraph[9].discordID + " (" + raid.signUpGraph[9].flavorText + ")" "\n \n" + 
+		raid.signUpGraph[9].discordID + " " + raid.signUpGraph[9].flavorText + "\n \n" + 
 
 		"10. DPS/Condi DPS \n" + 
-		raid.signUpGraph[10].discordID + " (" + raid.signUpGraph[10].flavorText + ")\n \n" +
+		raid.signUpGraph[10].discordID + " " + raid.signUpGraph[10].flavorText + "\n \n" +
 
 		"Reserves:" +
 		RaidReservesToString(raid) + "\n \n" +
@@ -944,9 +941,9 @@ function Vertex(spot, adjecentEdges) { //Own implementation
 	this.discordID = "";
 	this.flavorText = "";
 	this.adjecentEdges = adjecentEdges;
-	this.color = undefined;
-	this.distance = undefined;
-	this.parent = undefined;
+	this.color = null;
+	this.distance = Infinity;
+	this.parent = null;
 }
 
 function SignUpGraph() {//Own graph implementation specific to signUpList problem
@@ -983,7 +980,7 @@ function BFS(Graph, source) { //[CLRS] 22.2, page 595, Pseudo code implementatio
 			if(Graph[(u.adjecentEdges[i])].color === "white") {
 				Graph[(u.adjecentEdges[i])].color = "gray";
 				Graph[(u.adjecentEdges[i])].distance = (u.distance + 1);
-				Graph[(u.adjecentEdges[i])].parent = u;
+				Graph[(u.adjecentEdges[i])].parent = u.spot;
 				queue.Enqueue(Graph[(u.adjecentEdges[i])]);
 			}
 		}
@@ -993,7 +990,7 @@ function BFS(Graph, source) { //[CLRS] 22.2, page 595, Pseudo code implementatio
 
 function EmptySpotReachable(Graph, emptySpots) {
 	for (var i = 0; i < emptySpots.length; i++) {
-		if(Graph[emptySpots[i]].parent) {
+		if(Graph[Graph[emptySpots[i]].parent]) {
 			return Graph[emptySpots[i]];
 		}
 	}
@@ -1002,16 +999,18 @@ function EmptySpotReachable(Graph, emptySpots) {
 
 function CopyVertexInfo(v1, v2) {
 	v2.discordID = v1.discordID;
+	v2.flavorText = v1.flavorText;
 	v2.adjecentEdges = v1.adjecentEdges;
 }
 
 function PlaceSourceInList(Graph, emptySpotWithinReach){
-	if(!emptySpotWithinReach.parent) {
-		SetSourceVertex([0], null);
+	if(emptySpotWithinReach.parent === null) {
+		SetSourceVertex(Graph, [0], "", "");
 		return;
 	}
-	CopyVertexInfo(emptySpotWithinReach.parent, emptySpotWithinReach);
-	PlaceSourceInList(Graph, emptySpotWithinReach.parent);
+
+	CopyVertexInfo(Graph[emptySpotWithinReach.parent], emptySpotWithinReach);
+	PlaceSourceInList(Graph, Graph[emptySpotWithinReach.parent]);
 	return;
 }
 
