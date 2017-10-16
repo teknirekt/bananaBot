@@ -821,9 +821,6 @@ function DefinedInterval(definedInterval) {
 function AddInterval(intervalString) {
 	var intervalNumbers = [];
 
-	console.log("Inside addInterval");
-	console.log(intervalString);
-
 	if(intervalString.length > 2){
 		return false;
 	}
