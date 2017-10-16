@@ -153,7 +153,6 @@ client.on("message", message => {
 
 			SetSourceVertex(raid.signUpGraph, [parseInt(args[1])], userAlreadySigned[1], args[2]);
 			BFS(raid.signUpGraph, raid.signUpGraph[0]);
-			UpdateJSON();
 
 			var switchVertex = EmptySpotReachable(raid.signUpGraph, raid.rolesAvailable);
 			if(switchVertex) {
@@ -213,12 +212,20 @@ client.on("message", message => {
 
 			var stringIntervals = args.slice(1);
 
+			console.log("1. Pure input:");
+			console.log(stringIntervals);
+			console.log();
+
 			if(!stringIntervals || stringIntervals.length === 0) {
 				message.channel.send("Please add intervals/spots you'd like to fill.");
 				return;
 			}
 
 			stringIntervals = (IntervalStringsToIntervals(stringIntervals));
+
+			console.log("2. Input to intervals:");
+			console.log(stringIntervals);
+			console.log();
 
 			if(typeof(stringIntervals) === "string") {
 				message.channel.send("\'" + stringIntervals + "\' is not a valid interval.\n" +
@@ -228,13 +235,22 @@ client.on("message", message => {
 
 			stringIntervals = (IntervalsToFullNumbers(stringIntervals));
 
+			console.log("3. Intervals to full numbers:");
+			console.log(stringIntervals);
+			console.log();
+
 			var backToIntervalStrings = NumbersArrayToIntervalString(stringIntervals)
+
+			console.log("4. Full numbers to stringIntervals:");
+			console.log(backToIntervalStrings);
+			console.log();
+			console.log("full numbers:");
+			console.log(stringIntervals);
 
 			SetSourceVertex(raid.signUpGraph, stringIntervals,
 				userAlreadySigned[1].toString(), backToIntervalStrings);
 
 			BFS(raid.signUpGraph, raid.signUpGraph[0]);
-			UpdateJSON();
 
 			var switchVertex = EmptySpotReachable(raid.signUpGraph, raid.rolesAvailable);
 			if(switchVertex) {
@@ -337,6 +353,7 @@ client.on("message", message => {
 				case (userAlreadySigned[0] === 1): //If user is signed up as a reserves
 					raid.signUpGraph[userAlreadySigned[2]] = new Vertex(userAlreadySigned[2], [userAlreadySigned[2]]);
 					raid.rolesAvailable.push(userAlreadySigned[2]);
+					raid.rolesAvailable.sort(numberSort);
 					UpdateJSON();
 					fetchedMsg.edit(RaidSetupMessage(raid));
 					message.channel.send(userAlreadySigned[1] + ", I've removed you from spot #" + userAlreadySigned[2] + " in \'" + raid.name + "\'.");
@@ -808,11 +825,11 @@ function DefinedInterval(definedInterval) {
 			break;
 
 		case "dps":
-			return [7,8,9,10];
+			return [7,10];
 			break;
 
 		case "all":
-			return [1,2,3,4,5,6,7,8,9,10];
+			return [1,10];
 			break;
 
 		default:
@@ -834,9 +851,12 @@ function IntervalStringsToIntervals(intervalStrings){
 	return intervals;
 }
 
-//Turns [1,5] => [1, 2, 3, 4, 5]
+//Turns "[1,5]" => [1, 5]
 function AddInterval(intervalString) {
 	var intervalNumbers = [];
+
+	console.log("Inside addInterval");
+	console.log(intervalString);
 
 	if(intervalString.length > 2){
 		return false;
@@ -861,7 +881,11 @@ function AddInterval(intervalString) {
 	}
 
 	for(var i = parseInt(intervalString[0]); i <= parseInt(intervalString[intervalString.length-1]); i++) {
-		intervalNumbers.push(i);
+		if(!intervalNumbers) {
+			intervalNumbers = [i];
+		} else {
+			intervalNumbers.push(i);
+		}
 	}
 
 	return intervalNumbers;
@@ -903,15 +927,27 @@ function NumbersArrayToIntervalString(numbersArrayNoDuplicates) {
 	return intervalString.slice(0,-2);
 }
 
-//Turns ["[7-10]", "[5-8]"] => [7, 8, 9, 10, 5, 6, 7, 8] => [5, 6, 7, 8, 9, 10]
+function IntervalToFullNumber(interval) {
+	var fullNumber = [interval[0]];
+	console.log("inside intervalToFullNumber");
+	console.log(interval);
+	console.log(interval[0]);
+	console.log(interval[interval.length-1]);
+	for (var i = interval[0]; i <= interval[interval.length-1]; i++) {
+		fullNumber.push(i);
+	}
+	return fullNumber;
+}
+
+//Turns [[7, 10], [5, 8]] => [7, 8, 9, 10, 5, 6, 7, 8] => [5, 6, 7, 8, 9, 10]
 function IntervalsToFullNumbers(intervals) {
 	if(!AddInterval(intervals[0])) { //Is it a valid interval?
 		return intervals[0];
 	}
 
-	var fullNumbers = AddInterval(intervals[0]);
+	var fullNumbers = IntervalToFullNumber(intervals[0]);
 	for(var i = 1; i < intervals.length; i++) {
-		fullNumbers = fullNumbers.concat(AddInterval(intervals[i]));//Concatinate all interval arrays
+		fullNumbers = fullNumbers.concat(IntervalToFullNumber(intervals[i]));//Concatinate all interval arrays
 	}
 
 	fullNumbers.sort(numberSort); // Sort the numbers to prepare for removing duplicates.
@@ -1082,29 +1118,5 @@ Queue.prototype.IsEmpty = function() {
 node -e 'require("./app.js").test()'
 */
 module.exports.test = function () {
-var str1 = "[8]";
-var str2 = "dps";
-
-var strArgs = [];
-strArgs.push(str1);
-strArgs.push(str2);
-
-console.log(strArgs);
-
-strArgs = (IntervalStringsToIntervals(strArgs));
-
-if(typeof(strArgs) === "string") {
-	console.log("\'" + strArgs + "\' is not a valid interval.");
-	return;
-}
-
-console.log(strArgs);
-
-strArgs = (IntervalsToFullNumbers(strArgs));
-
-
-console.log(strArgs);
-
-
 
 };
