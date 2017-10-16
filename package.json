@@ -1,14 +1,22 @@
 {
-  "name": "mybot",
+  "name": "bananabot",
   "version": "1.0.0",
-  "description": "gw2HelperBot",
+  "description": "Discord Bot for organizing raids in GW2",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/XLOlsen/bananaBot.git"
+  },
   "author": "XLOlsen",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/XLOlsen/bananaBot/issues"
+  },
+  "homepage": "https://github.com/XLOlsen/bananaBot#readme",
   "dependencies": {
-    "discord.js": "^11.2.1",
+    "discord.js": "^11.2.1"
   }
 }
