@@ -216,7 +216,10 @@ client.on("message", message => {
 				return;
 			}
 
-			var stringIntervals = args.slice(1);
+			//var stringIntervals = args.slice(1);
+			var stringIntervals = args[1].split("+");
+			console.log(args[1]);
+			console.log(stringIntervals);
 
 			if(!stringIntervals || stringIntervals.length === 0) {
 				message.channel.send("Please add intervals/spots you'd like to fill.");
@@ -234,7 +237,7 @@ client.on("message", message => {
 
 			stringIntervals = (IntervalsToFullNumbers(stringIntervals));
 
-			var backToIntervalStrings = NumbersArrayToIntervalString(stringIntervals)
+			var backToIntervalStrings = NumbersArrayToIntervalString(stringIntervals);
 
 			SetSourceVertex(raid.signUpGraph, stringIntervals,
 				userAlreadySigned[1].toString(), backToIntervalStrings);

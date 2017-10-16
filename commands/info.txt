@@ -1,4 +1,4 @@
-I am bananaBot v1.0.0
+I am bananaBot v1.1.0
 
 I'm here to help you register for raids.
 
