@@ -2,7 +2,7 @@ RAIDRESERVES
 	@param (args[0] = raidName) 	STRING
 	@param (args[1] = discordName) 	STRING (officersOnly, optional)
 
-	Add author of message to the raidSignup as a reserve.
+	Add author of message/discordName to the raidSignup as a reserve.
 	
 	Example:
 	~raidReserves trainingRaid

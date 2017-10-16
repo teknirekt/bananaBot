@@ -2,7 +2,7 @@ RAIDREMOVE
 	@param (args[0] = raidName) 	STRING
 	@param (args[1] = discordName) 	STRING (officersOnly, optional)
 
-	Remove author of message from raidSignUp.
+	Remove author of message/discordName from raidSignUp.
 	
 	Example:
 	~raidRemove trainingRaid

@@ -1,0 +1,12 @@
+RAIDFILL
+	@param (args[0] = raidName) 		STRING
+	@param (args[>0] = discordName) 	INTERVAL (atleast 1)
+
+	Add author of message to the raidSignup as fill.
+
+	Valid intervals: chrono, druid, ps, dps, all, [1], [1-3], [3-10]
+	[i-j] where 0 < i <= j < 11 
+	[i] where 0 < i < 11.
+
+	Example:
+	'~raidFill trainingRaid chrono [3] dps [5-8]'

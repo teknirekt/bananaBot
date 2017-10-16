@@ -2,7 +2,6 @@ const Discord = require("discord.js");
 const client = new Discord.Client();
 const token = require("./settings.json").token;
 const fs = require("fs");
-const util = require('util');
 
 //Following are all the help command txt's as variables.
 const infoTXT = fs.readFileSync("commands/info.txt", "utf8");
@@ -11,6 +10,7 @@ const deleteRaidTXT = fs.readFileSync("commands/deleteRaid.txt", "utf8");
 const listRaidsTXT = fs.readFileSync("commands/listRaids.txt", "utf8");
 const newRaidTXT = fs.readFileSync("commands/newRaid.txt", "utf8");
 const raidAddTXT = fs.readFileSync("commands/raidAdd.txt", "utf8");
+const raidFillTXT = fs.readFileSync("commands/raidFill.txt", "utf8");
 const raidReservesTXT = fs.readFileSync("commands/raidReserves.txt", "utf8");
 const raidRemoveTXT = fs.readFileSync("commands/raidRemove.txt", "utf8");
 const raidSetupTXT = fs.readFileSync("commands/raidSetup.txt", "utf8");
@@ -22,7 +22,6 @@ ex. permission = everyone/officers/guildmembers.
 
 - Set channel option
 
-- Reserve spot option
 */
 
 client.on("ready",() => {
@@ -52,21 +51,23 @@ client.on("message", message => {
 	} else
 
 
-	/*------------------------------ INFO ------------------------------
-
-	Prints out info message.
-	*/
+	
 	if(message.content.startsWith(prefix + "info")) {
+		/*------------------------------ INFO ------------------------------
+
+		Prints out info message.
+		*/
 		message.channel.send(infoTXT);
 	}
 
 
-	/* ------------------------------ HELP ------------------------------
-	@param (args[0] = command) 		STRING
+	
+	if (message.content.startsWith(prefix + "help")) { 	
+		/* ------------------------------ HELP ------------------------------
+		@param (args[0] = command) 		STRING
 
-	Lists all commands, or in depth explanation of specific commands.
-	*/
-	if (message.content.startsWith(prefix + "help")) { 		
+		Lists all commands, or in depth explanation of specific commands.
+		*/	
 		switch (args[0]) {
 
 			case "deleteRaid":
@@ -83,6 +84,10 @@ client.on("message", message => {
 
 			case "raidAdd":
 				message.channel.send(raidAddTXT);
+				break;
+
+			case "raidFill":
+				message.channel.send(raidFillTXT);
 				break;
 
 			case "raidReserves":
@@ -104,16 +109,16 @@ client.on("message", message => {
 	} else
 
 
-	/* ------------------------------ RAIDADD ------------------------------
-	@param (args[0] = raidName) 		STRING
-	@param (args[1] = roleIndex) 		INT
-	@param (args[2] = roleDescription) 	STRING
-	@param (args[3] = discordName) 		STRING (optional)
-
-	Add author of message or user to the raidSignup:
-	*/
+	
 	if(message.content.startsWith(prefix + "raidAdd")) {
+		/* ------------------------------ RAIDADD ------------------------------
+		@param (args[0] = raidName) 		STRING
+		@param (args[1] = roleIndex) 		INT
+		@param (args[2] = roleDescription) 	STRING
+		@param (args[3] = discordName) 		STRING (optional)
 
+		Add author of message or user to the raidSignup:
+		*/
 		var raid = raidExists(args[0]);
 		if(!(raid || (raid === 0))) {
 			message.channel.send("There currently is no signup for this raid: " + args[0]);
@@ -173,14 +178,14 @@ client.on("message", message => {
 	} else
 
 
-	/* ------------------------------ RAIDFILL ------------------------------
-	@param (args[0] = raidName) 		STRING
-	@param (args[1] = discordName) 		STRING (optional)
-
-	Add author of message to the raidSignup as shop-up/fill:
-	*/
+	
 	if(message.content.startsWith(prefix + "raidFill")) {
-		
+		/* ------------------------------ RAIDFILL ------------------------------
+		@param (args[0] = raidName) 		STRING
+		@param (args[>0] = discordName) 	STRING (atleast 1)
+
+		Add author of message to the raidSignup as fill:
+		*/
 		var raid = raidExists(args[0]);
 		if(!(raid || (raid === 0))) {
 			message.channel.send("There currently is no signup for this raid: " + args[0]);
@@ -253,14 +258,14 @@ client.on("message", message => {
 	}
 
 
-	/* ------------------------------ RAIDRESERVE ------------------------------
-	@param (args[0] = raidName) 		STRING
-	@param (args[1] = discordName) 		STRING (optional)
-
-	Add author of message to the raidSignup as shop-up/reserve:
-	*/
+	
 	if(message.content.startsWith(prefix + "raidReserves")) {
+		/* ------------------------------ RAIDRESERVE ------------------------------
+		@param (args[0] = raidName) 		STRING
+		@param (args[1] = discordName) 		STRING (optional)
 
+		Add author of message to the raidSignup as reserve:
+		*/
 		var raid = raidExists(args[0]);
 		if(!(raid || (raid === 0))) {
 			message.channel.send("There currently is no signup for this raid: " + args[0]);
@@ -296,13 +301,14 @@ client.on("message", message => {
 	} else
 
 
-	/* ------------------------------ RAIDREMOVE ------------------------------
-	@param (args[0] = raidName) 		STRING
-	@param (args[1] = discordName) 		STRING (optional)
-
-	Remove author of message from raidSignUp:
-	*/
+	
 	if(message.content.startsWith(prefix + "raidRemove")) {
+		/* ------------------------------ RAIDREMOVE ------------------------------
+		@param (args[0] = raidName) 		STRING
+		@param (args[1] = discordName) 		STRING (optional)
+
+		Remove author of message from raidSignUp:
+		*/
 		var raid = raidExists(args[0]);
 		if(!(raid || (raid === 0))) { //Does raid exist?
 			message.channel.send("There currently is no signup for this raid: " + args[0]);
@@ -347,17 +353,18 @@ client.on("message", message => {
 	} else
 
 
-	/* ------------------------------ RAIDSETUP ------------------------------
-	@param (args[0] = raidName) 		STRING
-	@param (args[1] = day)		 		STRING
-	@param (args[2] = date)		 		STRING
-	@param (args[3] = time) 			STRING
-	@param (args[4] = timezone) 		STRING
 
-
-	Set up a raidSetup message inside the channel, deleting previous message.
-	*/
 	if(message.content.startsWith(prefix + "raidSetup")) {
+		/* ------------------------------ RAIDSETUP ------------------------------
+		@param (args[0] = raidName) 		STRING
+		@param (args[1] = day)		 		STRING
+		@param (args[2] = date)		 		STRING
+		@param (args[3] = time) 			STRING
+		@param (args[4] = timezone) 		STRING
+
+
+		Set up a raidSetup message inside the channel, deleting previous message.
+		*/
 		//First permission is checked:
 		if(!HigherPermission(message.member)) {
 			message.channel.send(message.author + ", you don't have permission to run this command.");
@@ -420,13 +427,13 @@ client.on("message", message => {
 	} else
 
 
-	/* ------------------------------ NEWRAID ------------------------------
-	@param (args[0] = raidName) 		STRING
 
-	Adds a new raid name to available raids.	
-	*/
 	if(message.content.startsWith(prefix + "newRaid")) {
+		/* ------------------------------ NEWRAID ------------------------------
+		@param (args[0] = raidName) 		STRING
 
+		Adds a new raid name to available raids.	
+		*/
 		if(!HigherPermission(message.member)) { //Does message author have permission?
 			message.channel.send(message.author + ", you don't have permission for this command.");
 			return;
@@ -453,12 +460,13 @@ client.on("message", message => {
 	} else
 
 
-	/* ------------------------------ DELETERAID ------------------------------
-	@param (args[0] = raidName) 		STRING
 	
-	Deletes a raid, given it exists in availableRaids.
-	*/
 	if(message.content.startsWith(prefix + "deleteRaid")) {
+		/* ------------------------------ DELETERAID ------------------------------
+		@param (args[0] = raidName) 		STRING
+		
+		Deletes a raid, given it exists in availableRaids.
+		*/
 		if(!HigherPermission(message.member)) {
 			message.channel.send(message.author + ", you don't have permission for this command.");
 			return;
@@ -482,11 +490,12 @@ client.on("message", message => {
 	} else
 
 
-	/* ------------------------------ LISTRAIDS ------------------------------
 	
-	Lists all raids available to setup.
-	*/
 	if(message.content.startsWith(prefix + "listRaids")) {
+		/* ------------------------------ LISTRAIDS ------------------------------
+	
+		Lists all raids available to setup.
+		*/
 		if(raidData["availableRaids"].raids.length === 0) {
 			message.channel.send("There are currently no available raids.");
 			return;
@@ -519,17 +528,18 @@ Make sure to update the token inside /settings.json
 const highRoles = ["Idiotic Leader", "Officers", "Master of Coin"]; 
 
 
-/* ------------------------------ USERINSIGNUPRESERVE ------------------------------
-@Param userToString DISCORDJS.USER.TOSTRING: String representation of a discord user.
-@Param raid JSON.OBJECT: Pass the object raidData[raidName] from raidData.json.
 
-@Return result INT: (true) Index of found user in raid.reserves.
-@Return result BOOLEAN: false.
-
-Iterates the raid.reserves elements in the raid object, searching for the user. If the user
-is found, the index is returned. If not, false is returned.
-*/
 function UserInSignUpReserves(userToString, raid) {
+	/* ------------------------------ USERINSIGNUPRESERVE ------------------------------
+	@Param userToString DISCORDJS.USER.TOSTRING: String representation of a discord user.
+	@Param raid JSON.OBJECT: Pass the object raidData[raidName] from raidData.json.
+
+	@Return result INT: (true) Index of found user in raid.reserves.
+	@Return result BOOLEAN: false.
+
+	Iterates the raid.reserves elements in the raid object, searching for the user. If the user
+	is found, the index is returned. If not, false is returned.
+	*/
 	for(var i = 0; i < raid.reserves.length; i++) {
 		if(raid.reserves[i].indexOf(userToString) !== -1) {
 			return i; //If user is in raid.reserves list return index i 
@@ -549,23 +559,22 @@ function UserInSignUpList(userToString, raid) {
 }
 
 
-/* ----------------------- USERALREADYSIGNEDUPREPORT ------------------------
-@Param message DISCORDJS.MESSAGE: Pass the message that prompted the command.
-@Param raid JSON.OBJECT: Pass the object raidData[raidName] from raidData.json.
-@Param username STRING: Pass a valid name or nothing.
-
-@Return resultTrueArray ARRAY[roleOrReserve, DISCORDJS.USER, roleOrReserveIndex]: 
-Array values depend on if user was in roles or reserve, the user passed, and the index
-the user was found at in roles or reserves.
-@Return resultFalseArray ARRAY[userNotFound=2, DISCORDJS.USER]:
- 
-Checks whether the username passed or the message author is already signed up
-as taking a role or being a reserve in the raid. If the passed user is found in raid.roles, it will
-be indicated by 0. If passed user is found in raid.reserves, it will be indicated by 1.
-If passed user is not found, it will be indicated by 2, and the index will not be passed.
-*/
 function UserAlreadySignedReport(message, raid, username) {
+	/* ----------------------- USERALREADYSIGNEDUPREPORT ------------------------
+	@Param message DISCORDJS.MESSAGE: Pass the message that prompted the command.
+	@Param raid JSON.OBJECT: Pass the object raidData[raidName] from raidData.json.
+	@Param username STRING: Pass a valid name or nothing.
 
+	@Return resultTrueArray ARRAY[roleOrReserve, DISCORDJS.USER, roleOrReserveIndex]: 
+	Array values depend on if user was in roles or reserve, the user passed, and the index
+	the user was found at in roles or reserves.
+	@Return resultFalseArray ARRAY[userNotFound=2, DISCORDJS.USER]:
+	 
+	Checks whether the username passed or the message author is already signed up
+	as taking a role or being a reserve in the raid. If the passed user is found in raid.roles, it will
+	be indicated by 0. If passed user is found in raid.reserves, it will be indicated by 1.
+	If passed user is not found, it will be indicated by 2, and the index will not be passed.
+	*/
 	var userToAdd = SelfOrAnotherUser(message, username).toString();
 	var userAlreadyInReserves = UserInSignUpReserves(userToAdd, raid);
 	var userAlreadyInList = UserInSignUpList(userToAdd, raid);
@@ -581,14 +590,14 @@ function UserAlreadySignedReport(message, raid, username) {
 }
 
 
-/* ------------------------------ RAIDEXISTS ------------------------------
-@Param member DISCORDJS.USER: Pass the author of the message that prompted the command.
-
-@Return result BOOLEAN: true/false, depending on role of the member.
-
-If the member has 1 of the high roles, true is returned. If not, false is returned.
-*/
 function raidExists(raidName) {
+	/* ------------------------------ RAIDEXISTS ------------------------------
+	@Param member DISCORDJS.USER: Pass the author of the message that prompted the command.
+
+	@Return result BOOLEAN: true/false, depending on role of the member.
+
+	If the member has 1 of the high roles, true is returned. If not, false is returned.
+	*/
 	for(var i = 0; i < raidData["availableRaids"].raids.length; i++) {
 		if(raidData["availableRaids"].raids[i] === (raidName)) {
 			return i;
@@ -598,14 +607,14 @@ function raidExists(raidName) {
 }
 
 
-/* ------------------------------ HIGHERPERMISSION ------------------------------
-@Param member DISCORDJS.USER: Pass the author of the message that prompted the command.
-
-@Return result BOOLEAN: true/false, depending on role of the member.
-
-If the member has 1 of the high roles, true is returned. If not, false is returned.
-*/
 function HigherPermission(member) {
+	/* ------------------------------ HIGHERPERMISSION ------------------------------
+	@Param member DISCORDJS.USER: Pass the author of the message that prompted the command.
+
+	@Return result BOOLEAN: true/false, depending on role of the member.
+
+	If the member has 1 of the high roles, true is returned. If not, false is returned.
+	*/
 	if(member.roles.some(r => highRoles.includes(r.name))){
 		return true; //If member is 1 of the high roles (higher permission), return true
 	} else {
@@ -614,20 +623,20 @@ function HigherPermission(member) {
 }
 
 
-/* ------------------------------ CANFINDANDMANAGEUSER ------------------------------
-@Param message DISCORDJS.MESSAGE: Pass the message that prompted the command.
-@Param username STRING: Pass a name.
-
-@Return result BOOLEAN: true/false, depending on permission and username validity.
-
- 
-1. If the message author doesn't have the permission, the author is told in a 
-	chat message, and false is returned.
-2. If the username is invalid/not found, the author is told in a chat message, and
-	false is returned.
-3. If the message author have the permission and the username is valid, true is returned.
-*/
 function CanFindAndManageUser(message, username) {
+	/* ------------------------------ CANFINDANDMANAGEUSER ------------------------------
+	@Param message DISCORDJS.MESSAGE: Pass the message that prompted the command.
+	@Param username STRING: Pass a name.
+
+	@Return result BOOLEAN: true/false, depending on permission and username validity.
+
+	 
+	1. If the message author doesn't have the permission, the author is told in a 
+		chat message, and false is returned.
+	2. If the username is invalid/not found, the author is told in a chat message, and
+		false is returned.
+	3. If the message author have the permission and the username is valid, true is returned.
+	*/
 	if(!UserExists(username)) {
 		if(!HigherPermission(message.member)) {
 			message.channel.send(message.author + ", you don't have permission to manage other users.");
@@ -640,20 +649,20 @@ function CanFindAndManageUser(message, username) {
 }
 
 
-/* ------------------------------ USEREXISTS ------------------------------
-@Param username STRING|UNDEFINED: Pass a name or nothing.
-
-@Return result BOOLEAN: true/false depending on username exists.
-
-If the username is not undefined (an argument is passed), and the user still can't 
-be found on the server, false is returned. Otherwise it returns true.
-
-Note: this function returns true even though no argument is passed. This is to help
-maintaining "overloaded" commands for ex. raidAdd, so highRoles also can signup
-themselves, without having to pass their own name as argument. (May not be the best way
-to do this, but w/e).
-*/
 function UserExists (username) {
+	/* ------------------------------ USEREXISTS ------------------------------
+	@Param username STRING|UNDEFINED: Pass a name or nothing.
+
+	@Return result BOOLEAN: true/false depending on username exists.
+
+	If the username is not undefined (an argument is passed), and the user still can't 
+	be found on the server, false is returned. Otherwise it returns true.
+
+	Note: this function returns true even though no argument is passed. This is to help
+	maintaining "overloaded" commands for ex. raidAdd, so highRoles also can signup
+	themselves, without having to pass their own name as argument. (May not be the best way
+	to do this, but w/e).
+	*/
 	if(username !== undefined && client.users.find("username", username) === null) {
 		return false;
 	}
@@ -662,17 +671,17 @@ function UserExists (username) {
 }
 
 
-/* ------------------------------ SELFORANOTHERUSER ------------------------------
-@Param message DISCORDJS.MESSAGE: Pass the message that prompted the command.
-@Param username STRING: Pass a valid discord name from the server.
-
-@Return selfOrAnotherUser DISCORDJS.USER: ToString representation of a DiscordJS user.
-
-If the message author has the permission, and the username is valid, 
-the User.ToString corresponding to the username will be returned. Otherwise the
-message author will be returned.
-*/
 function SelfOrAnotherUser(message, username) {
+	/* ------------------------------ SELFORANOTHERUSER ------------------------------
+	@Param message DISCORDJS.MESSAGE: Pass the message that prompted the command.
+	@Param username STRING: Pass a valid discord name from the server.
+
+	@Return selfOrAnotherUser DISCORDJS.USER: ToString representation of a DiscordJS user.
+
+	If the message author has the permission, and the username is valid, 
+	the User.ToString corresponding to the username will be returned. Otherwise the
+	message author will be returned.
+	*/
 	if((message.member.roles.some(r => highRoles.includes(r.name))) && username) {
 		var selfOrAnotherUser = client.users.find("username", username).toString();
 	} else {
@@ -682,14 +691,14 @@ function SelfOrAnotherUser(message, username) {
 }
 
 
-/* ------------------------------ RAIDSETUPMESSAGE ------------------------------
-@Param raid JSON.OBJECT: Pass the object raidData[raidName] from raidData.json.
-
-@Return result STRING: A String representation of a raidSetup.
-
-Inserts info from the raid object into a String template.
-*/
 function RaidSetupMessage(raid) {
+	/* ------------------------------ RAIDSETUPMESSAGE ------------------------------
+	@Param raid JSON.OBJECT: Pass the object raidData[raidName] from raidData.json.
+
+	@Return result STRING: A String representation of a raidSetup.
+
+	Inserts info from the raid object into a String template.
+	*/
 	return ("raidSetup: " + raid.name + " \n" +
 		"\@everyone \n" +
 		raid.day + " " + raid.date + " " + raid.time + " " + raid.timezone + "\n" +
@@ -733,15 +742,15 @@ function RaidSetupMessage(raid) {
 }
 
 
-/* ------------------------------ RAIDRESERVESTOSTRING ------------------------------
-@Param raid JSON.OBJECT: Pass the object raidData[raidName] from raidData.json.
-
-@Return result STRING: A String representation of raid.reserves.
-
-Iterates the raid.reserves data in the raid object adding each element as a string 
-representation.
-*/
 function RaidReservesToString(raid){
+	/* ------------------------------ RAIDRESERVESTOSTRING ------------------------------
+	@Param raid JSON.OBJECT: Pass the object raidData[raidName] from raidData.json.
+
+	@Return result STRING: A String representation of raid.reserves.
+
+	Iterates the raid.reserves data in the raid object adding each element as a string 
+	representation.
+	*/
 	var resultString = "";
 
 	for(var i = 0; i < raid.reserves.length; i++) {
@@ -752,22 +761,11 @@ function RaidReservesToString(raid){
 }
 
 
-
-function RaidFillToString(raid){
-	var resultString = "";
-
-	for(var i = 0; i < raid.fill.length; i++) {
-		resultString += "\n" + raid.fill[i][0] + ": " + raid.fill[i][2]
-	}
-
-	return resultString;
-}
-
-/* ----------------------------- UPDATEJSON ------------------------------
-
-Writes/updates the changes to raidData.json.
-*/
 function UpdateJSON() {
+	/* ----------------------------- UPDATEJSON ------------------------------
+
+	Writes/updates the changes to raidData.json.
+	*/
 	fs.writeFile("./raidData.json", JSON.stringify(raidData), (err) => {
 		if (err) console.error(err); //log errors
 	});
@@ -776,7 +774,7 @@ function UpdateJSON() {
 
 /**************************************************************************************
 ***************************************************************************************
-*************************  TESTING - CODE IN PRODUCTION  ******************************
+*********************  CODE RELATED TO GRAPH DATASTRUCTURE  ***************************
 ***************************************************************************************
 ***************************************************************************************/
 
@@ -817,20 +815,6 @@ function DefinedInterval(definedInterval) {
 		default:
 			return false;
 	}
-}
-//Turns "[7-10]" or "dps" => [7,10] 
-function IntervalStringsToIntervals(intervalStrings){
-	var intervals = [];
-	for(var i = 0; i < intervalStrings.length; i++) {
-		if(DefinedInterval(intervalStrings[i])) {
-			intervals.push(DefinedInterval(intervalStrings[i]));
-		} else if(AddInterval(intervalStrings[i].slice(1,-1).split("-"))){
-			intervals.push(AddInterval(intervalStrings[i].slice(1,-1).split("-")));
-		} else {
-			return intervalStrings[i];
-		}
-	}
-	return intervals;
 }
 
 //Turns "[1,5]" => [1, 5]
@@ -873,6 +857,21 @@ function AddInterval(intervalString) {
 	return intervalNumbers;
 }
 
+//Turns "[7-10]" or "dps" => [7,10] 
+function IntervalStringsToIntervals(intervalStrings){
+	var intervals = [];
+	for(var i = 0; i < intervalStrings.length; i++) {
+		if(DefinedInterval(intervalStrings[i])) {
+			intervals.push(DefinedInterval(intervalStrings[i]));
+		} else if(AddInterval(intervalStrings[i].slice(1,-1).split("-"))){
+			intervals.push(AddInterval(intervalStrings[i].slice(1,-1).split("-")));
+		} else {
+			return intervalStrings[i];
+		}
+	}
+	return intervals;
+}
+
 //Turns [1, 1, 2, 3, 4, 4, 5] => [1, 2, 3, 4, 5]
 function RemoveDuplicates(numbersArray) {
 	var numbersArrayNoDuplicates = [];
@@ -884,29 +883,6 @@ function RemoveDuplicates(numbersArray) {
 	}
 
 	return numbersArrayNoDuplicates;
-}
-
-//Turns [1, 2, 3, 4, 5] => "[1-5]"
-function NumbersArrayToIntervalString(numbersArrayNoDuplicates) {
-	var intervalString = "";
-	var x = 0;
-	var y = x;
-
-	for(var i = 0; i < numbersArrayNoDuplicates.length; i++) {
-		if((numbersArrayNoDuplicates[i+1]-numbersArrayNoDuplicates[i]) !== 1) {
-			if(x === y) {
-				intervalString += "[" + numbersArrayNoDuplicates[x] + "], ";
-			} else {
-				intervalString += "[" + numbersArrayNoDuplicates[x] + "-" + numbersArrayNoDuplicates[y] + "], ";
-			}
-			x = i+1;
-			y = x 
-		} else {
-			y = i+1;
-		}
-	}
-
-	return intervalString.slice(0,-2);
 }
 
 //Turns [1, 3] => [1, 2, 3]
@@ -935,6 +911,29 @@ function IntervalsToFullNumbers(intervals) {
 	return fullNumbers;
 }
 
+//Turns [1, 2, 3, 4, 5] => "[1-5]"
+function NumbersArrayToIntervalString(numbersArrayNoDuplicates) {
+	var intervalString = "";
+	var x = 0;
+	var y = x;
+
+	for(var i = 0; i < numbersArrayNoDuplicates.length; i++) {
+		if((numbersArrayNoDuplicates[i+1]-numbersArrayNoDuplicates[i]) !== 1) {
+			if(x === y) {
+				intervalString += "[" + numbersArrayNoDuplicates[x] + "], ";
+			} else {
+				intervalString += "[" + numbersArrayNoDuplicates[x] + "-" + numbersArrayNoDuplicates[y] + "], ";
+			}
+			x = i+1;
+			y = x 
+		} else {
+			y = i+1;
+		}
+	}
+
+	return intervalString.slice(0,-2);
+}
+
 function Intersect(a, b) {
     var t;
     if (b.length > a.length) t = b, b = a, a = t; // indexOf to loop over shorter
@@ -950,8 +949,8 @@ Graph creation and manipulation
 
 
 */
-
-function Vertex(spot, adjecentEdges) { //Own implementation
+//Own implementation
+function Vertex(spot, adjecentEdges) { 
 	this.spot = spot;
 	this.discordID = "";
 	this.flavorText = "";
@@ -961,7 +960,8 @@ function Vertex(spot, adjecentEdges) { //Own implementation
 	this.parent = null;
 }
 
-function SignUpGraph() {//Own graph implementation specific to signUpList problem
+//Own graph implementation specific to signUpList problem
+function SignUpGraph() {
 	var graph = [new Vertex(0, [0])];
 	for(var i = 1; i < 11; i++) {
 		graph.push(new Vertex(i, [i]));
@@ -975,7 +975,8 @@ function SetSourceVertex(Graph, adjEdges, id, text) {
 	Graph[0].flavorText = text;
 }
 
-function BFS(Graph, source) { //[CLRS] 22.2, page 595, Pseudo code implementation
+//[CLRS] 22.2, page 595, Pseudo code implementation
+function BFS(Graph, source) { 
 	for(var i = 1; i < (Graph.length); i++) {
 		Graph[i].color = "white";
 		Graph[i].distance = Infinity;
@@ -1091,6 +1092,12 @@ Queue.prototype.IsEmpty = function() {
 		return false;
 	}
 }
+
+/**************************************************************************************
+***************************************************************************************
+*************************  TESTING - CODE IN PRODUCTION  ******************************
+***************************************************************************************
+***************************************************************************************/
 
 
 /*
