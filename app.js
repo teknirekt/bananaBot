@@ -105,7 +105,6 @@ client.on("message", message => {
 			default:
 				message.channel.send(commandsTXT);
 		}
-		
 	} else
 
 
@@ -125,6 +124,12 @@ client.on("message", message => {
 			return;
 		}
 		raid = raidData[args[0]];
+
+		if(!RaidSetupInMessageChannel(message.channel.id, raidData[args[0]])) {
+			message.channel.send("\'" + args[0] + "\' is not setup in this channel.\n" + 
+				"Go to \'" + client.channels.get(raidData[args[0]].channel) + "\' for the right channel.");
+			return;
+		}
 
 		message.channel.fetchMessage(raid.currentSignupMsg).then(fetchedMsg => {
 			if(!CanFindAndManageUser(message, args[3])) { //Is messageAuthor allowed to add 
@@ -193,6 +198,12 @@ client.on("message", message => {
 			return;
 		}
 		raid = raidData[args[0]];
+
+		if(!RaidSetupInMessageChannel(message.channel.id, raidData[args[0]])) {
+			message.channel.send("\'" + args[0] + "\' is not setup in this channel.\n" + 
+				"Go to \'" + client.channels.get(raidData[args[0]].channel) + "\' for the right channel.");
+			return;
+		}
 
 		message.channel.fetchMessage(raid.currentSignupMsg).then(fetchedMsg => {
 			var userAlreadySigned = UserAlreadySignedReport(message, raid, false);
@@ -278,6 +289,12 @@ client.on("message", message => {
 		}
 		raid = raidData[args[0]];
 
+		if(!RaidSetupInMessageChannel(message.channel.id, raidData[args[0]])) {
+			message.channel.send("\'" + args[0] + "\' is not setup in this channel.\n" + 
+				"Go to \'" + client.channels.get(raidData[args[0]].channel) + "\' for the right channel.");
+			return;
+		}
+
 		message.channel.fetchMessage(raid.currentSignupMsg).then(fetchedMsg => {
 			if(!CanFindAndManageUser(message, args[1])) { //Is messageAuthor allowed to add 
 				return; //other users and is it a valid username?
@@ -320,6 +337,13 @@ client.on("message", message => {
 			return; //If no, stop.
 		}
 		raid = raidData[args[0]];
+
+
+		if(!RaidSetupInMessageChannel(message.channel.id, raidData[args[0]])) {
+			message.channel.send("\'" + args[0] + "\' is not setup in this channel.\n" + 
+				"Go to \'" + client.channels.get(raidData[args[0]].channel) + "\' for the right channel.");
+			return;
+		}
 
 		message.channel.fetchMessage(raid.currentSignupMsg).then(fetchedMsg => {
 
@@ -380,21 +404,10 @@ client.on("message", message => {
 			return; //If no, stop.
 		}
 
-		if(!raidData[args[0]]) {
-			raidData[args[0]] = { //If raid doesn't exist
-				//Initialize the new raid with blank data
-				name: args[0],
-				day: "",
-				date: "",
-				time: "",
-				timezone: "",
-				rolesAvailable: [1,2,3,4,5,6,7,8,9,10],
-				signUpGraph: [],
-				reserves: [],
-				currentSignupMsg: "",
-				channel: ""
-			};
-			UpdateJSON(); //Update JSON.
+		if(!RaidSetupInMessageChannel(message.channel.id, raidData[args[0]])) { //Right channel?
+			message.channel.send("\'" + args[0] + "\' is not setup in this channel.\n" + 
+				"Go to \'" + client.channels.get(raidData[args[0]].channel) + "\' for the right channel.");
+			return;
 		}
 
 		if(args.length < 5) {
@@ -437,7 +450,7 @@ client.on("message", message => {
 		/* ------------------------------ NEWRAID ------------------------------
 		@param (args[0] = raidName) 		STRING
 
-		Adds a new raid name to available raids.	
+		Adds a new raid to available raids, @the channel the command was posted in.	
 		*/
 		if(!HigherPermission(message.member)) { //Does message author have permission?
 			message.channel.send(message.author + ", you don't have permission for this command.");
@@ -460,6 +473,21 @@ client.on("message", message => {
 			return;
 		}
 		raidData["availableRaids"].raids.push(args[0]);
+
+		raidData[args[0]] = {
+			//Initialize the new raid with blank data
+			name: args[0],
+			day: "",
+			date: "",
+			time: "",
+			timezone: "",
+			rolesAvailable: [],
+			signUpGraph: [],
+			reserves: [],
+			currentSignupMsg: "",
+			channel: message.channel.id
+		};
+
 		UpdateJSON();
 		message.channel.send(message.author + ", I've added \'" + args[0] + "\' to available raids.");
 	} else
@@ -486,7 +514,20 @@ client.on("message", message => {
 
 		if(raidToDelete === 0 || raidToDelete) {
 			raidData["availableRaids"].raids.splice(raidToDelete, 1);
+
+			if(raidData[args[0]].currentSignupMsg) { //If there is a signUpMsg, then delete it
+				client.channels.get(raidData[args[0]].channel)
+					.fetchMessage(raidData[args[0]].currentSignupMsg).then(fetchedMsg => {
+						fetchedMsg.delete();//Get channel=>message=>delete it
+					}).catch(error => {
+						console.error(error);
+					});
+					 
+			}
+
+			delete raidData[args[0]];
 			UpdateJSON();
+			message.channel.send("Deleting SignUp message for \'" + args[0] + "\'.");
 			message.channel.send(message.author + ", I've deleted \'" + args[0] + "\' from available raids.")
 			return;
 		} else {
@@ -765,6 +806,14 @@ function RaidReservesToString(raid){
 	return resultString;
 }
 
+function RaidSetupInMessageChannel(channelID, raid) {
+	//Returns true if the raidSetup message was 
+	if(channelID === raid.channel) {
+		return true;
+	} else {
+		return false;
+	}
+}
 
 function UpdateJSON() {
 	/* ----------------------------- UPDATEJSON ------------------------------
