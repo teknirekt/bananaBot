@@ -486,7 +486,8 @@ client.on("message", message => {
 			signUpGraph: [],
 			reserves: [],
 			currentSignupMsg: "",
-			channel: message.channel.id
+			channel: message.channel.id,
+			permission: ""
 		};
 
 		UpdateJSON();
@@ -573,7 +574,12 @@ Make sure to update the token inside /settings.json
 
 //Roles with higher permissions in an array as Strings
 const highRoles = ["Idiotic Leader", "Officers", "Master of Coin"]; 
+const coreMembers = ["Core Raid Members"];
+const guildMembers = ["Honorary member", "Non active members", "Member"];
+const trainingMembers = ["training member"];
 
+const guildMembersExcludingTraining = highRoles.concat(coreMembers).concat(guildMembers);
+const allGuildMembers = guildMembersExcludingTraining.concat(trainingMembers);
 
 
 function UserInSignUpReserves(userToString, raid) {
