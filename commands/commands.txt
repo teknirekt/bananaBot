@@ -19,4 +19,7 @@ These are the commands I know of:
 	raidReserves(raid, discordName)
 	raidRemove(raid, discordName)
 
-Note: All commands should be executed using the prefix. All arguments are seperated by spaces.
+Note: 
+1. All commands should be executed using the prefix. 
+2. All commands are case-sensitive.
+3. All arguments are seperated by spaces.

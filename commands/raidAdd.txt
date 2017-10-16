@@ -4,7 +4,8 @@ RAIDADD
 	@param (args[2] = roleDescription) 	STRING
 	@param (args[3] = discordName) 		STRING (officersOnly, optional)
 
-	Add author of message/discordName to the raidSignup.
+	Add author of message/discordName to the specified spot at raidSignup.
+	Intended for single spot signups. If you want intervals, check out raidFill.
 
 	Example:
 	'~raidAdd trainingRaid 7 CondiSoulbeast'

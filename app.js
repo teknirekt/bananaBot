@@ -152,7 +152,8 @@ client.on("message", message => {
 			}
 
 			if(isNaN(parseInt(args[1])) || ((parseInt(args[1]) < 1) || (parseInt(args[1]) > 10))){
-				message.channel.send(message.author + ", \'" + args[1] + "\' is not a valid spot index.");
+				message.channel.send(message.author + ", \'" + args[1] + "\' is not a valid spot.\n" +
+					"spot should be of type integer between 1 to 10. ~help raidAdd");
 				return;
 			}
 
@@ -226,7 +227,8 @@ client.on("message", message => {
 
 			if(typeof(stringIntervals) === "string") {
 				message.channel.send("\'" + stringIntervals + "\' is not a valid interval.\n" +
-					"Examples of valid intervals: [1-3], [6], chrono, druid, ps, dps, all");
+					"Examples of valid intervals: [1-3], [6], chrono, druid, ps, dps, all\n" +
+					"~help raidFill");
 				return;
 			}
 
