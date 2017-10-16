@@ -141,7 +141,7 @@ client.on("message", message => {
 
 				case (userAlreadySigned[0] === 1): //If user is signed up in list
 					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
-						args[0] + "\' at a specified spot or as a fill.");
+						args[0] + "\' at a specified spot or as fill.");
 					return;
 			}
 
@@ -153,7 +153,7 @@ client.on("message", message => {
 
 			if(isNaN(parseInt(args[1])) || ((parseInt(args[1]) < 1) || (parseInt(args[1]) > 10))){
 				message.channel.send(message.author + ", \'" + args[1] + "\' is not a valid spot.\n" +
-					"spot should be of type integer between 1 to 10. ~help raidAdd");
+					"Spot should be of type integer between 1 to 10. ~help raidAdd");
 				return;
 			}
 
@@ -206,7 +206,7 @@ client.on("message", message => {
 
 				case (userAlreadySigned[0] === 1): //If user is signed up in list
 					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
-						args[0] + "\' at a specified spot or as a fill.");
+						args[0] + "\' at a specified spot or as fill.");
 					return;
 			}
 
