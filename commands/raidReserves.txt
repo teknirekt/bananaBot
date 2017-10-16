@@ -1,8 +1,8 @@
-RAIDREMOVE
+RAIDRESERVES
 	@param (args[0] = raidName) 	STRING
 	@param (args[1] = discordName) 	STRING (officersOnly, optional)
 
-	Remove author of message/discordName from raidSignUp.
+	Add author of message/discordName to the raidSignup as a reserve.
 	
 	Example:
-	~raidRemove trainingRaid
+	~raidReserves trainingRaid
