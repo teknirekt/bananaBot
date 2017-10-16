@@ -420,8 +420,9 @@ client.on("message", message => {
 		if(raidData[args[0]].channel && raidData[args[0]].currentSignupMsg) { //Delete previous signup message.
 			client.channels.get(raidData[args[0]].channel)
 				.fetchMessage(raidData[args[0]].currentSignupMsg).then(fetchedMsg => {
+        
 					message.channel.send("Deleting previous raidSignUp message from channel \'" + 
-						client.channels.get(raidData[args[0]].channel) + "\'.")
+						client.channels.get(raidData[args[0]].channel) + "\'.");
 				fetchedMsg.delete();
 				}).catch(err =>{console.log("raidSetup, deletePrevFetchedMsg:\n" + err)});
 		}
@@ -824,7 +825,6 @@ function UpdateJSON() {
 		if (err) console.error(err); //log errors
 	});
 }
-
 
 /**************************************************************************************
 ***************************************************************************************
