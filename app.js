@@ -212,20 +212,12 @@ client.on("message", message => {
 
 			var stringIntervals = args.slice(1);
 
-			console.log("1. Pure input:");
-			console.log(stringIntervals);
-			console.log();
-
 			if(!stringIntervals || stringIntervals.length === 0) {
 				message.channel.send("Please add intervals/spots you'd like to fill.");
 				return;
 			}
 
 			stringIntervals = (IntervalStringsToIntervals(stringIntervals));
-
-			console.log("2. Input to intervals:");
-			console.log(stringIntervals);
-			console.log();
 
 			if(typeof(stringIntervals) === "string") {
 				message.channel.send("\'" + stringIntervals + "\' is not a valid interval.\n" +
@@ -235,17 +227,7 @@ client.on("message", message => {
 
 			stringIntervals = (IntervalsToFullNumbers(stringIntervals));
 
-			console.log("3. Intervals to full numbers:");
-			console.log(stringIntervals);
-			console.log();
-
 			var backToIntervalStrings = NumbersArrayToIntervalString(stringIntervals)
-
-			console.log("4. Full numbers to stringIntervals:");
-			console.log(backToIntervalStrings);
-			console.log();
-			console.log("full numbers:");
-			console.log(stringIntervals);
 
 			SetSourceVertex(raid.signUpGraph, stringIntervals,
 				userAlreadySigned[1].toString(), backToIntervalStrings);
@@ -927,12 +909,9 @@ function NumbersArrayToIntervalString(numbersArrayNoDuplicates) {
 	return intervalString.slice(0,-2);
 }
 
+//Turns [1, 3] => [1, 2, 3]
 function IntervalToFullNumber(interval) {
 	var fullNumber = [interval[0]];
-	console.log("inside intervalToFullNumber");
-	console.log(interval);
-	console.log(interval[0]);
-	console.log(interval[interval.length-1]);
 	for (var i = interval[0]; i <= interval[interval.length-1]; i++) {
 		fullNumber.push(i);
 	}
