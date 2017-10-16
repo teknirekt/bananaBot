@@ -798,6 +798,10 @@ function DefinedInterval(definedInterval) {
 			return [1,2];
 			break;
 
+		case "uba":
+			return [2];
+			break;
+
 		case "druid":
 			return [3,4];
 			break;
@@ -808,6 +812,10 @@ function DefinedInterval(definedInterval) {
 
 		case "dps":
 			return [7,10];
+			break;
+
+		case "any":
+			return [1,10];
 			break;
 
 		case "all":
