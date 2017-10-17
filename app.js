@@ -18,7 +18,7 @@ const raidSetupTXT = fs.readFileSync("commands/raidSetup.txt", "utf8");
 let raidData = JSON.parse(fs.readFileSync("./raidData.json", "utf8"));
 /* Ideas for future versions:
 - Make raidSetup function restrict who's allowed to signup based on an additional argument 
-ex. permission = everyone/officers/guildmembers.
+ex. permission = everyone/Officers/guildMembers.
 
 - Set channel option
 
@@ -46,6 +46,8 @@ client.on("message", message => {
 		console.log("Testing...");
 	} else
 
+
+
 	if(message.content.startsWith(prefix + "cookie")) {
 		message.channel.send(message.author + ", thank you for the :cookie:\n Much appreciated :smiley:");
 	} else
@@ -57,8 +59,8 @@ client.on("message", message => {
 
 		Prints out info message.
 		*/
-		message.channel.send(infoTXT);
-	}
+		message.channel.send("```" + infoTXT + "```");
+	} else 
 
 
 	
@@ -71,42 +73,49 @@ client.on("message", message => {
 		switch (args[0]) {
 
 			case "deleteRaid":
-				message.channel.send(deleteRaidTXT);
+				message.channel.send("```" + deleteRaidTXT + "```");
 				break;
 
 			case "listRaids":
-				message.channel.send(listRaidsTXT);
+				message.channel.send("```" + listRaidsTXT + "```");
 				break;
 
 			case "newRaid":
-				message.channel.send(newRaidTXT);
+				message.channel.send("```" + newRaidTXT + "```");
 				break;
 
 			case "raidAdd":
-				message.channel.send(raidAddTXT);
+				message.channel.send("```" + raidAddTXT + "```");
 				break;
 
 			case "raidFill":
-				message.channel.send(raidFillTXT);
+				message.channel.send("```" + raidFillTXT + "```");
 				break;
 
 			case "raidReserves":
-				message.channel.send(raidReservesTXT);
+				message.channel.send("```" + raidReservesTXT + "```");
 				break;
 
 			case "raidRemove":
-				message.channel.send(raidRemoveTXT);
+				message.channel.send("```" + raidRemoveTXT + "```");
 				break;
 
 			case "raidSetup":
-				message.channel.send(raidSetupTXT);
+				message.channel.send("```" + raidSetupTXT + "```");
 				break;
 
 			default:
-				message.channel.send(commandsTXT);
+				message.channel.send("```" + commandsTXT + "```");
 		}
 	} else
 
+	/*
+
+	
+	Commands regarding signing up for raids.
+
+
+	*/
 
 	
 	if(message.content.startsWith(prefix + "raidAdd")) {
@@ -119,7 +128,7 @@ client.on("message", message => {
 		Add author of message or user to the raidSignup:
 		*/
 		var raid = raidExists(args[0]);
-		if(!(raid || (raid === 0))) {
+		if(!(raid || (raid === 0)) || raid.currentSignupMsg === "") {
 			message.channel.send("There currently is no signup for this raid: " + args[0]);
 			return;
 		}
@@ -128,6 +137,12 @@ client.on("message", message => {
 		if(!RaidSetupInMessageChannel(message.channel.id, raidData[args[0]])) {
 			message.channel.send("\'" + args[0] + "\' is not setup in this channel.\n" + 
 				"Go to \'" + client.channels.get(raidData[args[0]].channel) + "\' for the right channel.");
+			return;
+		}
+
+		if(raid.allowedRoles[0] !== "everyone" && !(PermissionToSignUp(message.member, raid))) {
+			message.channel.send(message.author + ", I'm sorry, but you don't have permission to join \'" + raid.name + "\', "+
+				"as it is restricted to: " + raid.allowedRoles);
 			return;
 		}
 
@@ -193,7 +208,7 @@ client.on("message", message => {
 		Add author of message to the raidSignup as fill:
 		*/
 		var raid = raidExists(args[0]);
-		if(!(raid || (raid === 0))) {
+		if(!(raid || (raid === 0)) || raid.currentSignupMsg === "") {
 			message.channel.send("There currently is no signup for this raid: " + args[0]);
 			return;
 		}
@@ -205,8 +220,14 @@ client.on("message", message => {
 			return;
 		}
 
+		if(raid.allowedRoles[0] !== "everyone" && !(PermissionToSignUp(message.member, raid))) {
+			message.channel.send(message.author + ", I'm sorry, but you don't have permission to join \'" + raid.name + "\', "+
+				"as it is restricted to: " + raid.allowedRoles);
+			return;
+		}
+
 		message.channel.fetchMessage(raid.currentSignupMsg).then(fetchedMsg => {
-			var userAlreadySigned = UserAlreadySignedReport(message, raid, false);
+			var userAlreadySigned = UserAlreadySignedReport(message, raid, args[2]);
 
 			switch (true) { //Is user already signed up?
 
@@ -271,7 +292,7 @@ client.on("message", message => {
 					"\', as fill for spots: (" + backToIntervalStrings + "), as they're currently taken.");
 			}
 		}).catch(err => {console.log(err)});
-	}
+	} else
 
 
 	
@@ -283,7 +304,7 @@ client.on("message", message => {
 		Add author of message to the raidSignup as reserve:
 		*/
 		var raid = raidExists(args[0]);
-		if(!(raid || (raid === 0))) {
+		if(!(raid || (raid === 0)) || raid.currentSignupMsg === "") {
 			message.channel.send("There currently is no signup for this raid: " + args[0]);
 			return;
 		}
@@ -292,6 +313,12 @@ client.on("message", message => {
 		if(!RaidSetupInMessageChannel(message.channel.id, raidData[args[0]])) {
 			message.channel.send("\'" + args[0] + "\' is not setup in this channel.\n" + 
 				"Go to \'" + client.channels.get(raidData[args[0]].channel) + "\' for the right channel.");
+			return;
+		}
+
+		if(raid.allowedRoles[0] !== "everyone" && !(PermissionToSignUp(message.member, raid))) {
+			message.channel.send(message.author + ", I'm sorry, but you don't have permission to join \'" + raid.name + "\', "+
+				"as it is restricted to: " + raid.allowedRoles);
 			return;
 		}
 
@@ -332,7 +359,7 @@ client.on("message", message => {
 		Remove author of message from raidSignUp:
 		*/
 		var raid = raidExists(args[0]);
-		if(!(raid || (raid === 0))) { //Does raid exist?
+		if(!(raid || (raid === 0)) || raid.currentSignupMsg === "") { //Does raid exist?
 			message.channel.send("There currently is no signup for this raid: " + args[0]);
 			return; //If no, stop.
 		}
@@ -397,6 +424,7 @@ client.on("message", message => {
 		//First permission is checked:
 		if(!HigherPermission(message.member)) {
 			message.channel.send(message.author + ", you don't have permission to run this command.");
+			return;
 		}
 		var raid = raidExists(args[0]);
 		if(!(raid || (raid === 0))) { //Does raid exist?
@@ -447,6 +475,91 @@ client.on("message", message => {
 
 
 
+	if(message.content.startsWith(prefix + "setRL")) {
+		
+		if(!HigherPermission(message.member)) {
+			message.channel.send(message.author + ", you don't have permission to run this command.");
+			return;
+		}
+		var raid = raidExists(args[0]);
+
+		if(!(raid || (raid === 0))) { //Does raid exist?
+			message.channel.send("The raid \'" + args[0] + "\' hasn't yet been initialized.");
+			return; //If no, stop.
+		}
+		raid = raidData[args[0]];
+
+		if(!RaidSetupInMessageChannel(message.channel.id, raid)) {
+			message.channel.send("\'" + args[0] + "\' is not setup in this channel.\n" + 
+				"Go to \'" + client.channels.get(raid.channel) + "\' for the right channel.");
+			return;
+		}
+
+		if(args[1] && !UserExists(args[1])) {
+			message.channel.send(message.author + ", I can't find user: " + args[1]);
+			return;
+		}
+
+		var userToAdd = SelfOrAnotherUser(message, args[1]);
+
+		raid.raidLeader = userToAdd.toString();
+		UpdateJSON();
+
+		if(raid.currentSignupMsg !== "") {
+			message.channel.fetchMessage(raid.currentSignupMsg)
+				.then(fetchedMsg => {
+					fetchedMsg.edit(RaidSetupMessage(raid));
+			});
+		}
+
+		message.channel.send("I've set " + raid.raidLeader + " as raid leader for \'" +
+			raid.name + "\'.");
+	} else 
+
+
+
+	if(message.content.startsWith(prefix + "clearRL")) {
+
+		if(!HigherPermission(message.member)) {
+			message.channel.send(message.author + ", you don't have permission to run this command.");
+			return;
+		}
+		var raid = raidExists(args[0]);
+
+		if(!(raid || (raid === 0))) { //Does raid exist?
+			message.channel.send("The raid \'" + args[0] + "\' hasn't yet been initialized.");
+			return; //If no, stop.
+		}
+		raid = raidData[args[0]];
+
+		if(!RaidSetupInMessageChannel(message.channel.id, raid)) {
+			message.channel.send("\'" + args[0] + "\' is not setup in this channel.\n" + 
+				"Go to \'" + client.channels.get(raid.channel) + "\' for the right channel.");
+			return;
+		}
+
+		raid.raidLeader = "None";
+		UpdateJSON();
+
+		if(raid.currentSignupMsg !== "") {
+			message.channel.fetchMessage(raid.currentSignupMsg)
+				.then(fetchedMsg => {
+					fetchedMsg.edit(RaidSetupMessage(raid));
+			});
+		}
+
+		message.channel.send("I've cleared the raid leader for \'" + raid.name + "\'.");
+	} else
+
+	/*
+
+
+	Commands regarding creation of new raids.
+
+
+	*/
+
+
 	if(message.content.startsWith(prefix + "newRaid")) {
 		/* ------------------------------ NEWRAID ------------------------------
 		@param (args[0] = raidName) 		STRING
@@ -469,11 +582,18 @@ client.on("message", message => {
 				"Example: " + prefix + "newRaid trainingRaid" );
 			return;
 		}
+
 		if(raidExists(args[0]) === 0 || raidExists(args[0])) {
 			message.channel.send("The raid: \'" + args[0] + "\', already exists.")
 			return;
 		}
+
 		raidData["availableRaids"].raids.push(args[0]);
+
+		var permissions = ParseStringToRolesStringArray(args[1]);
+		if(!permissions) {
+			permissions = ["everyone"];
+		}
 
 		raidData[args[0]] = {
 			//Initialize the new raid with blank data
@@ -487,11 +607,12 @@ client.on("message", message => {
 			reserves: [],
 			currentSignupMsg: "",
 			channel: message.channel.id,
-			permission: ""
+			allowedRoles: permissions,
+			raidLeader: "None"
 		};
-
 		UpdateJSON();
-		message.channel.send(message.author + ", I've added \'" + args[0] + "\' to available raids.");
+		message.channel.send(message.author + ", I've added \'" + args[0] + "\' to available raids.\n" +
+			"People who are able to join: " + (raidData[args[0]].allowedRoles.join(", ")));
 	} else
 
 
@@ -518,9 +639,11 @@ client.on("message", message => {
 			raidData["availableRaids"].raids.splice(raidToDelete, 1);
 
 			if(raidData[args[0]].currentSignupMsg) { //If there is a signUpMsg, then delete it
+				message.channel.send("Deleting SignUp message for \'" + args[0] + "\'.");
 				client.channels.get(raidData[args[0]].channel)
 					.fetchMessage(raidData[args[0]].currentSignupMsg).then(fetchedMsg => {
 						fetchedMsg.delete();//Get channel=>message=>delete it
+
 					}).catch(error => {
 						console.error(error);
 					});
@@ -529,7 +652,7 @@ client.on("message", message => {
 
 			delete raidData[args[0]];
 			UpdateJSON();
-			message.channel.send("Deleting SignUp message for \'" + args[0] + "\'.");
+			
 			message.channel.send(message.author + ", I've deleted \'" + args[0] + "\' from available raids.")
 			return;
 		} else {
@@ -544,11 +667,11 @@ client.on("message", message => {
 	
 		Lists all raids available to setup.
 		*/
-		if(raidData["availableRaids"].raids.length === 0) {
-			message.channel.send("There are currently no available raids.");
+		if(!raidData["availableRaids"] || raidData["availableRaids"].raids.length === 0) {
+			message.channel.send("There currently are no available raids.");
 			return;
 		}
-		message.channel.send("Available raids are: " + raidData["availableRaids"].raids.join(", ") + ".");
+		message.channel.send("Available raids are: \n" + raidData["availableRaids"].raids.join("\n "));
 	}
 		
 });
@@ -575,11 +698,7 @@ Make sure to update the token inside /settings.json
 //Roles with higher permissions in an array as Strings
 const highRoles = ["Idiotic Leader", "Officers", "Master of Coin"]; 
 const coreMembers = ["Core Raid Members"];
-const guildMembers = ["Honorary member", "Non active members", "Member"];
-const trainingMembers = ["training member"];
-
-const guildMembersExcludingTraining = highRoles.concat(coreMembers).concat(guildMembers);
-const allGuildMembers = guildMembersExcludingTraining.concat(trainingMembers);
+const guildMembers = ["BNN"];
 
 
 function UserInSignUpReserves(userToString, raid) {
@@ -651,6 +770,10 @@ function raidExists(raidName) {
 
 	If the member has 1 of the high roles, true is returned. If not, false is returned.
 	*/
+	if(!raidData["availableRaids"]) {
+		return false;
+	}
+
 	for(var i = 0; i < raidData["availableRaids"].raids.length; i++) {
 		if(raidData["availableRaids"].raids[i] === (raidName)) {
 			return i;
@@ -673,6 +796,40 @@ function HigherPermission(member) {
 	} else {
 		return false; //if not return false.
 	}
+}
+
+
+function PermissionToSignUp(member, raid) {
+	if(member.roles.some(r => raid.allowedRoles.includes(r.name))){
+		return true; //If member is 1 of the allowed roles, return true
+	} else {
+		return false; //if not return false.
+	}
+}
+
+
+function ParseStringToRolesStringArray(roleString) {
+	switch(roleString) {
+
+		case "core":
+			return coreMembers;
+
+		case "guild":
+			return guildMembers;
+
+		default:
+			return false;
+
+		}
+}
+
+
+function AllowedRolesToString(raid) {
+	var resultString = "";
+	for (var i = 0; i < raid.allowedRoles.length; i++) {
+		resultString += " \@" + raid.allowedRoles[i] + ","
+	}
+	return resultString.slice(0, -1);
 }
 
 
@@ -752,9 +909,10 @@ function RaidSetupMessage(raid) {
 
 	Inserts info from the raid object into a String template.
 	*/
-	return ("raidSetup: " + raid.name + " \n" +
-		"\@everyone \n" +
-		raid.day + " " + raid.date + " " + raid.time + " " + raid.timezone + "\n" +
+	return ("Raid Setup: __**" + raid.name + "**__ \n" +
+		"Raid Leader: " + raid.raidLeader + "\n" +
+		"Allowed to join:" + AllowedRolesToString(raid) + "\n" + 
+		raid.day + " " + raid.date + " " + raid.time + " " + raid.timezone + "\n\n" +
 		"1. Chronotank \n" +
 		raid.signUpGraph[1].discordID + " " + raid.signUpGraph[1].flavorText + "\n \n" +
 
@@ -813,6 +971,7 @@ function RaidReservesToString(raid){
 	return resultString;
 }
 
+
 function RaidSetupInMessageChannel(channelID, raid) {
 	//Returns true if the raidSetup message was 
 	if(channelID === raid.channel) {
@@ -821,6 +980,7 @@ function RaidSetupInMessageChannel(channelID, raid) {
 		return false;
 	}
 }
+
 
 function UpdateJSON() {
 	/* ----------------------------- UPDATEJSON ------------------------------
