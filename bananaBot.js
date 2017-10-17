@@ -14,6 +14,8 @@ const raidFillTXT = fs.readFileSync("commands/raidFill.txt", "utf8");
 const raidReservesTXT = fs.readFileSync("commands/raidReserves.txt", "utf8");
 const raidRemoveTXT = fs.readFileSync("commands/raidRemove.txt", "utf8");
 const raidSetupTXT = fs.readFileSync("commands/raidSetup.txt", "utf8");
+const setRLTXT = fs.readFileSync("commands/setRL.txt", "utf8");
+const clearRLTXT = fs.readFileSync("commands/clearRL.txt", "utf8");
 
 let raidData = JSON.parse(fs.readFileSync("./raidData.json", "utf8"));
 /* Ideas for future versions:
@@ -102,6 +104,14 @@ client.on("message", message => {
 
 			case "raidSetup":
 				message.channel.send("```" + raidSetupTXT + "```");
+				break;
+
+			case "setRL":
+				message.channel.send("```" + setRLTXT + "```");
+				break;
+
+			case "clearRL":
+				message.channel.send("```" + clearRLTXT + "```");
 				break;
 
 			default:
@@ -250,8 +260,6 @@ client.on("message", message => {
 
 			//var stringIntervals = args.slice(1);
 			var stringIntervals = args[1].split("+");
-			console.log(args[1]);
-			console.log(stringIntervals);
 
 			if(!stringIntervals || stringIntervals.length === 0) {
 				message.channel.send("Please add intervals/spots you'd like to fill.");

@@ -1,12 +1,12 @@
-RAIDADD
-	@param (args[0] = raidName) 		STRING
-	@param (args[1] = roleIndex) 		INT
-	@param (args[2] = roleDescription) 	STRING
-	@param (args[3] = discordName) 		STRING (officersOnly, optional)
+Command: raidAdd
 
-	Add author of message/discordName to the specified spot at raidSignup.
-	Intended for single spot signups. If you want intervals, check out raidFill.
+@param (args[0] = raidName) STRING
+@param (args[1] = roleIndex) INT
+@param (args[2] = roleDescription) STRING
+@param (args[3] = discordName) STRING (officersOnly, optional)
 
-	Example:
-	'~raidAdd trainingRaid 7 CondiSoulbeast'
-	
+Add author of message/discordName to the specified spot at raidSignup.
+Intended for single spot signups. If you want intervals, check out raidFill.
+
+Example:
+'~raidAdd trainingRaid 7 CondiSoulbeast'
