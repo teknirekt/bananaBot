@@ -1,5 +1,5 @@
 # bananaBot
-##Discord Bot for organizing raids in GW2
+## Discord Bot for organizing raids in GW2
 
 For a nice little project I decided to make a bot to make raid organizing much easier in our GW2 guild, which means this bot was also only made with our own needs in focus.
 This is my first big project, and it has been cool trying to get everything working and thinking of efficient/working solutions.
@@ -13,10 +13,12 @@ Shoutout to https://github.com/AnIdiotsGuide for getting me started with his gui
 This section will be much alike the better version found at https://anidiotsguide.gitbooks.io/discord-js-bot-guide/getting-started/the-long-version.html
 
 1. Setup the bot account
+
 Thankfully, discord has made this very easy. Go to https://discordapp.com/developers/applications/me, and under the tab "My Apps" press the "New App" square. Choose a name for your bot (this will be the displayed name in discord), and press create app. You'll be taken to the app site, where you'll need both the client ID, and the token for later. Don't forget to press "Create a Bot User" aswell!
 Copy the clientID and go to https://finitereality.github.io/permissions-calculator/?v=1341652161, where you first set the permissions of the bot (should be pre-filled), and at the bottom of the page you just fill in the clientID and press "Add". Select the server you'd like to invite the bot to.
 
 2. Download bananaBot
+
 First off we want to get this bad boy onto wherever you intend to host bananaBot. Download this repository/clone it via the terminal using: 
 ```$ git clone git@github.com:XLOlsen/bananaBot.git```
 After this you can change the origin to your own repository,
@@ -25,21 +27,25 @@ or add another remote, so you can still fetch upgrades:
 ```$ git remote add personal http://github.com/YOU/YOUR_REPO```
 
 3. Create your own settings.json file
+
 Open an empty file, paste in: 
 ```{"token":"YOUR_TOKEN_GOES_HERE"}```
 Then save this file in the same folder as the other files, naming it settings.json.
 That's it! Of course, place your own unique token that you got from https://discordapp.com/developers/applications/me in the file between the quotes.
 
 4. Install latest Node.js version
+
 Go to https://nodejs.org/en/ and get the latest version. Install it.
 
 5. Install dependencies (DiscordJS)
+
 Go ahead and install the dependencies for the bot. As of this version(bananaBot 1.3.0), it'll only be discordJS. To install the dependencies go ahead in the terminal and type:
 ```$ npm install```
 After it's done, you should now have a node modules folder inside of your repository, and you can now fire up the bot by typing:
 ```$ node bananaBot.js```
 
 6. Tinkering the bot to your needs
+
 For this next step, you'll require atleast some programming/javascript skills. As you might've noticed, this bot was made specifically for BNN's own needs, and not a general ease of use, so you'd have to go through alot of the code refactoring to your own needs. 
 Examples of specific to BNN/hardcoded stuff include but are not limited to:
 - Guild roles
@@ -59,7 +65,7 @@ So you've got the bot up and running on whatever, and you wanna know how this ca
 
 If these 4 'rules' of operating the bot are not followed, you may receive unexpected results. Even though the bot have alot of fail safe's, and (not so)useful help messages, I might've missed some. Who knows?
 
-If you're ever in doubt try the ```~help``` or ```~help (commandName)``` commands, they will help you see the order of arguments, aswell as specifying what each argument expects. In short, they're there, as the name implies, to help you.
+If you're ever in doubt try the ```~help``` or ```~help (commandName)``` commands, they will let you see the order of arguments, aswell as specifying what each argument expects, explain the commands etc. In short, they're there, as the name implies, to help you.
 
 #### 2.1 Creating and setting up a new raid (Officers only)
 
@@ -82,7 +88,7 @@ You can sign up for a raid in 3 different ways.
 2. raidFill (Multiple spots, guaranteed spot)
 3. raidReserves (Backup/reserves, not guaranteed a spot) 
 
-Also when shit hits the fan/you find out you can't attend the raid even though you signed up, you can use
+Also when shit hits the fan/you find out you can't attend the raid even though you signed up, you can use:
 
 4. raidRemove (Removes you from the raid, whether you're add/fill/reserve)
 

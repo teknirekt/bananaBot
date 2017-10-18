@@ -18,13 +18,6 @@ const setRLTXT = fs.readFileSync("commands/setRL.txt", "utf8");
 const clearRLTXT = fs.readFileSync("commands/clearRL.txt", "utf8");
 
 let raidData = JSON.parse(fs.readFileSync("./raidData.json", "utf8"));
-/* Ideas for future versions:
-- Make raidSetup function restrict who's allowed to signup based on an additional argument 
-ex. permission = everyone/Officers/guildMembers.
-
-- Set channel option
-
-*/
 
 client.on("ready",() => {
 	console.log(new Date + "\nI\'m Online\nI\'m Online")
@@ -679,7 +672,7 @@ client.on("message", message => {
 			message.channel.send("There currently are no available raids.");
 			return;
 		}
-		message.channel.send("Available raids are: \n" + raidData["availableRaids"].raids.join("\n "));
+		message.channel.send("Available raids are: " + RaidsAvailableToString(raidData["availableRaids"]));
 	}
 		
 });
@@ -976,6 +969,26 @@ function RaidReservesToString(raid){
 		resultString += "\n" + raid.reserves[i]
 	}
 
+	return resultString;
+}
+
+function RaidsAvailableToString(availableRaids) {
+	var resultString = "";
+	for (var i = 0; i < availableRaids.length; i++) {
+		if(raidData[availableRaids[i]].currentSignupMsg !== "") {
+			resultString += "\n" + availableRaids[i] + " at channel " +
+				client.channels.get(raidData[availableRaids[i]].channel) + 
+				". Sign up is **open**, and " + 
+				AllowedRolesToString(raidData[availableRaids[i]]) +
+				" is allowed to join."
+		} else {
+			resultString += "\n" + availableRaids[i] + " at channel " +
+				client.channels.get(raidData[availableRaids[i]].channel) + 
+				". Sign up is **unavailable**, and " + 
+				AllowedRolesToString(raidData[availableRaids[i]]) +
+				" is allowed to join."
+		}
+	}
 	return resultString;
 }
 
