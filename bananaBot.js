@@ -693,9 +693,9 @@ client.on("message", message => {
 				" command, or DM me @XLOlsen#5081")
 			.setFooter("Live for Banana", "https://cdn.drawception.com/images/panels/2014/8-5/Xek68GTmsX-11.png")
 			.setTimestamp()
-			.addField("2.0 Practical information", "https://github.com/XLOlsen/bananaBot/tree/roleOnlyRaids#20-practical-information")
-			.addField("2.1 Creating and setting up a new raid (Officers only)", "https://github.com/XLOlsen/bananaBot/tree/roleOnlyRaids#21-creating-and-setting-up-a-new-raid-officers-only")
-			.addField("2.2 Signing up for raids (Everyone)", "https://github.com/XLOlsen/bananaBot/tree/roleOnlyRaids#22-signing-up-for-raids-everyone");
+			.addField("2.0 Practical information", "https://github.com/XLOlsen/bananaBot#20-practical-information")
+			.addField("2.1 Creating and setting up a new raid (Officers only)", "https://github.com/XLOlsen/bananaBot#21-creating-and-setting-up-a-new-raid-officers-only")
+			.addField("2.2 Signing up for raids (Everyone)", "https://github.com/XLOlsen/bananaBot#22-signing-up-for-raids-everyone");
 			message.channel.send(richMsg);
 		}
 	}
