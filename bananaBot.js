@@ -452,7 +452,8 @@ client.on("message", message => {
         
 					message.channel.send("Deleting previous raidSignUp message from channel \'" + 
 						client.channels.get(raidData[args[0]].channel) + "\'.");
-				fetchedMsg.delete();
+					console.log(new Date() + "\n" + fetchedMsg);
+					fetchedMsg.delete();
 				}).catch(err =>{console.log("raidSetup, deletePrevFetchedMsg:\n" + err)});
 		}
 
@@ -643,6 +644,7 @@ client.on("message", message => {
 				message.channel.send("Deleting SignUp message for \'" + args[0] + "\'.");
 				client.channels.get(raidData[args[0]].channel)
 					.fetchMessage(raidData[args[0]].currentSignupMsg).then(fetchedMsg => {
+						console.log(new Date() + "\n" + fetchedMsg);
 						fetchedMsg.delete();//Get channel=>message=>delete it
 
 					}).catch(error => {
