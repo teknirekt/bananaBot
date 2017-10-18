@@ -1,0 +1,9 @@
+Command: setRL
+
+@param (args[0] = raidName) STRING
+@param (args[1] = discordName) STRING (optional)
+
+Sets author of message/discordName as raid leader of the raid.
+
+Example:
+'~setRL trainingRaid'

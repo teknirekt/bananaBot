@@ -1,5 +1,6 @@
- LISTRAIDS
-	Lists all raids available to setup.
-	
-	Example:
-	~listRaids
+Command: listRaids
+
+Lists all raids available to setup.
+
+Example:
+'~listRaids'

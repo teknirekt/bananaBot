@@ -1,0 +1,8 @@
+Command: clearRL
+
+@param (args[0] = raidName) STRING
+
+Sets raid leader of raid to 'None'.
+
+Example:
+'~clearRL trainingRaid'

@@ -1,4 +1,4 @@
-I am bananaBot v1.0.0
+I am bananaBot v1.3.0
 
 I'm here to help you register for raids.
 
@@ -8,12 +8,12 @@ Language	: 	JavaScript
 FrameWork 	: 	DiscordJS
 discord.js	:	v11.2.1
 nodeJS		:	v6.11.4
-botVersion	: 	v1.0.0
+botVersion	: 	v1.3.0
 Date		:	10.10.2017
 
 Author		:	XLOlsen
 
 This bot was written as a hobby project specifically for BNN, to help ease the "paperwork" for the guild. I'd like to hand out a special thanks to BNN for being an awesome guild, this is my gift to you!
-Source code will definitely be available some day (when I learn how to gitHub)...
+Source code available @ https://github.com/XLOlsen/bananaBot
 
 If you have any ideas, feedback, or find any bugs, be sure to let me know on discord @XLOlsen#5081.

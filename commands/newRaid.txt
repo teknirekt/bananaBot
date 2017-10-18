@@ -1,7 +1,18 @@
-NEWRAID
-	@param (args[0] = raidName)	STRING
+Command: newRaid
 
-	Adds a new raid name to available raids.
-	
-	Example:
-	~newRaid trainingRaid
+@param (args[0] = raidName)	STRING
+@param (args[1] = permission) STRING (optional)
+
+Adds a new raid to available raids, limited to the channel where the command is called.
+
+Permissions:
+core (Core raid only)
+guild (Guild members only)
+none (Everyone is allowed)
+
+Example: 
+(Restriction: none)
+'~newRaid trainingRaid'
+
+(Restriction: guild only)
+'~newRaid trainingRaid guild'
