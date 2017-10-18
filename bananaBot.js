@@ -678,6 +678,8 @@ client.on("message", message => {
 		message.channel.send("Available raids are: " + RaidsAvailableToString(raidData["availableRaids"].raids));
 	} else
 
+
+
 	if(message.content.startsWith(prefix + "guide")) {
 		if(message.author.id !== botOwner) {
 			console.log(message.author.id);
@@ -701,6 +703,7 @@ client.on("message", message => {
 });
 
 client.login(token); 
+
 /* 
 Login with bot token.
 Can generate a new token @ https://discordapp.com/developers/applications/me ,
@@ -708,10 +711,6 @@ or create a new bot, by choosing "New App".
 
 Make sure to update the token inside /settings.json
 */
-
-
-
-
 
 /**************************************************************************************
 ***************************************************************************************
@@ -1210,14 +1209,6 @@ function NumbersArrayToIntervalString(numbersArrayNoDuplicates) {
 	return intervalString.slice(0,-2);
 }
 
-function Intersect(a, b) {
-    var t;
-    if (b.length > a.length) t = b, b = a, a = t; // indexOf to loop over shorter
-    return a.filter(function (e) {
-        return b.indexOf(e) !== -1;
-    });
-}
-
 /*
 
 
@@ -1377,7 +1368,7 @@ Queue.prototype.IsEmpty = function() {
 
 
 /*
-node -e 'require("./app.js").test()'
+node -e 'require("./bananaBot.js").test()'
 */
 module.exports.test = function () {
 

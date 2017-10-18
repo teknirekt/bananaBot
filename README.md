@@ -29,9 +29,9 @@ or add another remote, so you can still fetch upgrades:
 3. Create your own settings.json file
 
 Open an empty file, paste in: 
-```{"token":"YOUR_TOKEN_GOES_HERE"}```
+```{"token":"YOUR_TOKEN_GOES_HERE", "botOwner":"YOUR_DISCORD_ID_GOES_HERE"}```
 Then save this file in the same folder as the other files, naming it settings.json.
-That's it! Of course, place your own unique token that you got from https://discordapp.com/developers/applications/me in the file between the quotes.
+That's it! Of course, place your own unique token that you got from https://discordapp.com/developers/applications/me in the file between the quotes, aswell as your own personal discord ID.
 
 4. Install latest Node.js version
 
