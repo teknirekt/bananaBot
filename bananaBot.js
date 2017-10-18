@@ -1,6 +1,7 @@
 const Discord = require("discord.js");
 const client = new Discord.Client();
 const token = require("./settings.json").token;
+const botOwner = require("./settings.json").botOwner;
 const fs = require("fs");
 
 //Following are all the help command txt's as variables.
@@ -675,6 +676,26 @@ client.on("message", message => {
 			return;
 		}
 		message.channel.send("Available raids are: " + RaidsAvailableToString(raidData["availableRaids"].raids));
+	} else
+
+	if(message.content.startsWith(prefix + "guide")) {
+		if(message.author.id !== botOwner) {
+			console.log(message.author.id);
+			console.log(botOwner);
+			return;
+		} else {
+			var richMsg = new Discord.RichEmbed()
+			.setTitle("How to use bananaBot for raid registration")
+			.setDescription("The guide is hosted on over at github, and would give you an understanding" +
+				" of the basics of using the bot. \nIf you have further questions do try the ~help" +
+				" command, or DM me @XLOlsen#5081")
+			.setFooter("Live for Banana", "https://cdn.drawception.com/images/panels/2014/8-5/Xek68GTmsX-11.png")
+			.setTimestamp()
+			.addField("2.0 Practical information", "https://github.com/XLOlsen/bananaBot/tree/roleOnlyRaids#20-practical-information")
+			.addField("2.1 Creating and setting up a new raid (Officers only)", "https://github.com/XLOlsen/bananaBot/tree/roleOnlyRaids#21-creating-and-setting-up-a-new-raid-officers-only")
+			.addField("2.2 Signing up for raids (Everyone)", "https://github.com/XLOlsen/bananaBot/tree/roleOnlyRaids#22-signing-up-for-raids-everyone");
+			message.channel.send(richMsg);
+		}
 	}
 		
 });
