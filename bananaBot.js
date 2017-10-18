@@ -28,6 +28,7 @@ var prefix = "~" //This is the prefix for executing bot commands
 
 client.on("message", message => {
 	let args = message.content.split(" ").slice(1); // returns an array with string arguments who were separated by space.
+	let command = message.content.split(" ")[0];
 	argsResult = args.join(" "); //concatinates the args Array
 
 	if(!message.content.startsWith(prefix)) return; //If message doesn't contain the bot prefix, the bot ignores the message
@@ -38,19 +39,19 @@ client.on("message", message => {
 
 
 	//Secret test
-	if(message.content.startsWith(prefix + "test")) {
+	if(command === prefix + "test") {
 		console.log("Testing...");
 	} else
 
 
 
-	if(message.content.startsWith(prefix + "cookie")) {
+	if(command === prefix + "cookie") {
 		message.channel.send(message.author + ", thank you for the :cookie:\n Much appreciated :smiley:");
 	} else
 
 
 	
-	if(message.content.startsWith(prefix + "info")) {
+	if(command === prefix + "info") {
 		/*------------------------------ INFO ------------------------------
 
 		Prints out info message.
@@ -60,7 +61,7 @@ client.on("message", message => {
 
 
 	
-	if (message.content.startsWith(prefix + "help")) { 	
+	if (command === prefix + "help") { 	
 		/* ------------------------------ HELP ------------------------------
 		@param (args[0] = command) 		STRING
 
@@ -122,7 +123,7 @@ client.on("message", message => {
 	*/
 
 	
-	if(message.content.startsWith(prefix + "raidAdd")) {
+	if(command === prefix + "raidAdd") {
 		/* ------------------------------ RAIDADD ------------------------------
 		@param (args[0] = raidName) 		STRING
 		@param (args[1] = roleIndex) 		INT
@@ -204,7 +205,7 @@ client.on("message", message => {
 
 
 	
-	if(message.content.startsWith(prefix + "raidFill")) {
+	if(command === prefix + "raidFill") {
 		/* ------------------------------ RAIDFILL ------------------------------
 		@param (args[0] = raidName) 		STRING
 		@param (args[>0] = discordName) 	STRING (atleast 1)
@@ -298,7 +299,7 @@ client.on("message", message => {
 
 
 	
-	if(message.content.startsWith(prefix + "raidReserves")) {
+	if(command === prefix + "raidReserves") {
 		/* ------------------------------ RAIDRESERVE ------------------------------
 		@param (args[0] = raidName) 		STRING
 		@param (args[1] = discordName) 		STRING (optional)
@@ -353,7 +354,7 @@ client.on("message", message => {
 
 
 	
-	if(message.content.startsWith(prefix + "raidRemove")) {
+	if(command === prefix + "raidRemove") {
 		/* ------------------------------ RAIDREMOVE ------------------------------
 		@param (args[0] = raidName) 		STRING
 		@param (args[1] = discordName) 		STRING (optional)
@@ -412,7 +413,7 @@ client.on("message", message => {
 
 
 
-	if(message.content.startsWith(prefix + "raidSetup")) {
+	if(command === prefix + "raidSetup") {
 		/* ------------------------------ RAIDSETUP ------------------------------
 		@param (args[0] = raidName) 		STRING
 		@param (args[1] = day)		 		STRING
@@ -478,7 +479,7 @@ client.on("message", message => {
 
 
 
-	if(message.content.startsWith(prefix + "setRL")) {
+	if(command === prefix + "setRL") {
 		
 		if(!HigherPermission(message.member)) {
 			message.channel.send(message.author + ", you don't have permission to run this command.");
@@ -521,7 +522,7 @@ client.on("message", message => {
 
 
 
-	if(message.content.startsWith(prefix + "clearRL")) {
+	if(command === prefix + "clearRL") {
 
 		if(!HigherPermission(message.member)) {
 			message.channel.send(message.author + ", you don't have permission to run this command.");
@@ -563,7 +564,7 @@ client.on("message", message => {
 	*/
 
 
-	if(message.content.startsWith(prefix + "newRaid")) {
+	if(command === prefix + "newRaid") {
 		/* ------------------------------ NEWRAID ------------------------------
 		@param (args[0] = raidName) 		STRING
 
@@ -620,7 +621,7 @@ client.on("message", message => {
 
 
 	
-	if(message.content.startsWith(prefix + "deleteRaid")) {
+	if(command === prefix + "deleteRaid") {
 		/* ------------------------------ DELETERAID ------------------------------
 		@param (args[0] = raidName) 		STRING
 		
@@ -666,7 +667,7 @@ client.on("message", message => {
 
 
 	
-	if(message.content.startsWith(prefix + "listRaids")) {
+	if(command === prefix + "listRaids") {
 		/* ------------------------------ LISTRAIDS ------------------------------
 	
 		Lists all raids available to setup.
@@ -680,7 +681,7 @@ client.on("message", message => {
 
 
 
-	if(message.content.startsWith(prefix + "guide")) {
+	if(command === prefix + "guide") {
 		if(message.author.id !== botOwner) {
 			console.log(message.author.id);
 			console.log(botOwner);
