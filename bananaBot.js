@@ -674,7 +674,7 @@ client.on("message", message => {
 			message.channel.send("There currently are no available raids.");
 			return;
 		}
-		message.channel.send("Available raids are: " + RaidsAvailableToString(raidData["availableRaids"]));
+		message.channel.send("Available raids are: " + RaidsAvailableToString(raidData["availableRaids"].raids));
 	}
 		
 });
@@ -830,9 +830,15 @@ function ParseStringToRolesStringArray(roleString) {
 function AllowedRolesToString(raid) {
 	var resultString = "";
 	for (var i = 0; i < raid.allowedRoles.length; i++) {
-		resultString += " \@" + raid.allowedRoles[i] + ","
+		if(raid.allowedRoles[i] !== "everyone") {
+			resultString += client.channels.get(raid.channel).guild.roles.find("name", raid.allowedRoles[i]) + ", "
+
+		} else {
+			resultString += "\@everyone, "
+		}
+		
 	}
-	return resultString.slice(0, -1);
+	return resultString.slice(0, -2);
 }
 
 
@@ -974,21 +980,22 @@ function RaidReservesToString(raid){
 	return resultString;
 }
 
+
 function RaidsAvailableToString(availableRaids) {
 	var resultString = "";
 	for (var i = 0; i < availableRaids.length; i++) {
 		if(raidData[availableRaids[i]].currentSignupMsg !== "") {
-			resultString += "\n" + availableRaids[i] + " at channel " +
+			resultString += "\n\n" + (i+1) + ". " + availableRaids[i] + " at channel " +
 				client.channels.get(raidData[availableRaids[i]].channel) + 
-				". Sign up is **open**, and " + 
-				AllowedRolesToString(raidData[availableRaids[i]]) +
-				" is allowed to join."
+				".\n Sign up is **open**, and **" + 
+				raidData[availableRaids[i]].allowedRoles.join("**, **") +
+				"** is allowed to join."
 		} else {
-			resultString += "\n" + availableRaids[i] + " at channel " +
+			resultString += "\n\n" + (i+1) + ". " + availableRaids[i] + " at channel " +
 				client.channels.get(raidData[availableRaids[i]].channel) + 
-				". Sign up is **unavailable**, and " + 
-				AllowedRolesToString(raidData[availableRaids[i]]) +
-				" is allowed to join."
+				".\n Sign up is **unavailable**, and **" + 
+				raidData[availableRaids[i]].allowedRoles.join("**, **") +
+				"** is allowed to join."
 		}
 	}
 	return resultString;
