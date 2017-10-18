@@ -1,5 +1,5 @@
 # bananaBot
-## Discord Bot for organizing raids in GW2
+#### Discord Bot for organizing raids in GW2
 
 For a nice little project I decided to make a bot to make raid organizing much easier in our GW2 guild, which means this bot was also only made with our own needs in focus.
 This is my first big project, and it has been cool trying to get everything working and thinking of efficient/working solutions.
@@ -65,7 +65,8 @@ So you've got the bot up and running on whatever, and you wanna know how this ca
 
 If these 4 'rules' of operating the bot are not followed, you may receive unexpected results. Even though the bot have alot of fail safe's, and (not so)useful help messages, I might've missed some. Who knows?
 
-If you're ever in doubt try the ```~help``` or ```~help (commandName)``` commands, they will let you see the order of arguments, aswell as specifying what each argument expects, explain the commands etc. In short, they're there, as the name implies, to help you.
+If you're ever in doubt try the ```~help``` or ```~help (commandName)``` commands, they will let you see the order of arguments, aswell as specifying what each argument expects, explain the commands etc.\\
+In short, they're there, as the name implies, to help you.
 
 #### 2.1 Creating and setting up a new raid (Officers only)
 
@@ -97,10 +98,8 @@ Also when shit hits the fan/you find out you can't attend the raid even though y
 The command ```~raidAdd``` is intended for when you want to sign up for just 1 specific spot. 
 The command structure is as follows: 
 ```raidAdd(raidName, spot, flavorText, discordName)```
-, where raidName is the name of the raid, spot is the desired spot number, flavorText is a related text (Remember: Arguments seperated by spaces! Flavor text should be 1 word), and discordName is an optional one, only allowed for officers.
-An example of using ```~raidAdd```:
-
-```~raidAdd trainingRaid 7 condiSoulBeast```
+, where raidName is the name of the raid, spot is the desired spot number, flavorText is a related text (Remember: Arguments seperated by spaces! Flavor text should be 1 word), and discordName is an optional one, only allowed for officers.\\
+An example of using ```~raidAdd``` could be: ```~raidAdd trainingRaid 7 condiSoulBeast```
 
 This will sign you up for spot #7, given it's empty, or the bot can move people around(People who signed up as fillers) to make the spot available for you.
 
@@ -108,39 +107,42 @@ For more info, try ```~help raidAdd```
 
 ##### 2.2.2 raidFill
 
-```~raidFill``` is for when you don't mind playing multiple roles/filling multiple spots. This command uses intervals to fill for different spots, but also have some predetermined intervals by name. 
+```~raidFill``` is for when you don't mind playing multiple roles/filling multiple spots. This command uses intervals to fill for different spots, but also have some predetermined intervals by name.\\
 The formal expression for a valid interval is:
 
-[i-j] where 0 < i <= j < 11 
+[i-j] where 0 < i <= j < 11\\
 [i] where 0 < i < 11
 
-This just means that intervals such as [1-3] and [8] are valid, and intervals such as [3-1] and [11] are invalid. The predetermined intervals are:
-```chrono```=[1-2], ```druid```=[3-4], ```ps```=[5-6], ```dps```=[7-10], ```all```=[1-10], ```any```=[1-10].
-And there might be a secret one aswell. All intervals are seperated by ```+```, which means ```[1-3]+dps+[6]+chrono``` is a valid interval.
+This just means that intervals such as [1-3] and [8] are valid, and intervals such as [3-1] and [11] are invalid. The predetermined intervals are:\\
+```chrono```=[1-2], ```druid```=[3-4], ```ps```=[5-6], ```dps```=[7-10], ```all```=[1-10], ```any```=[1-10].\\
+And there might be a secret one aswell.\\
+All intervals are seperated by ```+```, which means ```[1-3]+dps+[6]+chrono``` is a valid interval.
 
-But how does one use ```~raidFill```? Let's look at the structure: 
-```raidFill(raidName, intervals, discordName)```
-Again we have raidName which was the name of the raid, then we have intervals which are any valid interval as explained above(Remember to seperate different intervals by ```+```), and last we have the optional discordName, which again is limited to officers only.
-An example of using ```~raidFill``` would be:
-```~raidFill trainingRaid druid+chrono+[1]+[6-8]```
+But how does one use ```~raidFill```? Let's look at the structure:\\
+```raidFill(raidName, intervals, discordName)```\\
+Again we have raidName which was the name of the raid, then we have intervals which are any valid interval as explained above(Remember to seperate different intervals by ```+```), and last we have the optional discordName, which again is limited to officers only.\\
+An example of using ```~raidFill``` would be: ```~raidFill trainingRaid druid+chrono+[1]+[6-8]```
 
 As you'll notice, your intervals doesn't have to make sense, they just have to be valid. This will sign you up as fill for spots [1-4], [6-8], and you'll be placed in the first available spots of the ones you've specified. Now you might ask: Am I gonna be stuck on the first available spot then? 
-The answer is: No, not for sure. Here comes the smart thing about the bot. 
+The answer is: No, you can be moved around. Here comes the smart thing about the bot. 
 
-Whenever you try to sign up using ```~raidAdd```/```~raidFill```, the bot will look at the sign up, and try to place you in the spot(s) you specified. If all are taken, the bot will try to move people around to make a spot open for you. Let's take an example: You want spot [3-4], but they're both taken. The thing is, guy in spot #3 also signed up as fill for spot #7, which for your luck, means the bot will move him to spot #7 instead, so you can be signed up for spot #3. This is done using something called breadth first search, and... 
-Well I shouldn't bore you with all this info... 
+Let's take an example: You want spot [3-4], but they're both taken. The thing is, guy in spot #3 also signed up as fill for spot #7, which means the bot will move him to spot #7 instead, so you can be signed up for spot #3. This is done using something called breadth first search, and... 
+
+Well I shouldn't bore you with all the details...
 
 Instead, let us just say that the bot will find a spot for you if it's possible, if it's not possible, you'll have to try for another spot(s).
+
 
 For help, you can again use ```~help raidFill```.
 
 ##### 2.2.3 raidReserves
 
 So the raid is full, and you really want to go? Ask an officer to setup another raid! Or, you can use ```~raidReserves```. This will add you as a backup to the raid in case somebody who signed up decides to be late/not show up anyways. This will let us know, if we can contact you in case of 'emergencies'.
-The command structure is: ```raidReserves (raidName, discordName)```
-It's pretty simple, raidName would be the name of the raid you'd like to be a reserve, and discordName is again optional and limited to officers.
-Example of use:
-```~raidReserves trainingRaid```
+The command structure is:\\ 
+```raidReserves (raidName, discordName)```\\
+It's pretty simple, raidName would be the name of the raid you'd like to be a reserve, and discordName is again optional and limited to officers.\\
+Example of use: ```~raidReserves trainingRaid```
+
 This will add you as a reserve on the sign up message of the raid 'trainingRaid'.
 
 For more help, check out ```~help raidReserves```
@@ -148,18 +150,18 @@ For more help, check out ```~help raidReserves```
 ##### 2.2.4 raidRemove
 
 Picture this: 
-You forgot your birthday, a huge load of homework hit your desk, your pc broke, your girlfriend spontaneously invited your in-laws for dinner... In other words, you can't attend the raid you signed up for, for some reason. Fear not! You can sign off at any time using ```~raidRemove``` command.
+You forgot your birthday, a huge load of homework hit your desk, your pc broke, your girlfriend spontaneously invited your in-laws for dinner... In other words, you can't attend the raid you signed up for, for some reason. Fear not! You can sign off at any time using ```~raidRemove``` command.\\
 Just remember, **standard social etiquette still applies**:
 
 1. Try to cancel your sign up as soon as you know you can't attend.
 2. If it's late/on the day, please let an officer know, best to contact the raid leader if possible.
 3. Remember to remove yourself, to make the spot open for others. You can even do this through your phone by invoking the ```~raidRemove``` command. (remember, all 'commands' are in fact just simple discord messages).
 
-So now we got that out of the way, let's look at the command structure:
-```raidRemove(raidName, discordName)```
-Same as the others. raidName is the name of the raid where you want yourself removed from, discordName is optional limited to officers only.
-Example of use:
-```~raidRemove trainingRaid```
+So now we got that out of the way, let's look at the command structure:\\
+```raidRemove(raidName, discordName)```\\
+Same as the others. raidName is the name of the raid where you want yourself removed from, discordName is optional limited to officers only.\\
+Example of use: ```~raidRemove trainingRaid```
+
 This will remove you from 'trainingRaid', whether you signed up using ```~raidAdd```, ```~raidFill```, or ```~raidReserves```.
 
 For more help, try ```~help raidRemove```
