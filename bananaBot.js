@@ -130,75 +130,114 @@ client.on("message", message => {
 		@param (args[2] = roleDescription) 	STRING
 		@param (args[3] = discordName) 		STRING (optional)
 
-		Add author of message or user to the raidSignup:
+		Add author of message/user to the raidSignup:
 		*/
-		var raid = raidExists(args[0]);
+
+		//Checks if the raid exists. If not, end the command w/ helpful message.
+		var raid = raidExists(args[0]); //Either false or an index
 		if(!(raid || (raid === 0)) || raid.currentSignupMsg === "") {
 			message.channel.send("There currently is no signup for this raid: " + args[0]);
 			return;
 		}
 		raid = raidData[args[0]];
 
-		if(!RaidSetupInMessageChannel(message.channel.id, raidData[args[0]])) {
-			message.channel.send("\'" + args[0] + "\' is not setup in this channel.\n" + 
-				"Go to \'" + client.channels.get(raidData[args[0]].channel) + "\' for the right channel.");
+
+		//Checks whether the raid was initiated in the channel the command was called. If not, tell user which channel the raid is in.
+		if(!RaidSetupInMessageChannel(message.channel.id, raid)) {
+			message.channel.send("\'" + raid.name + "\' is not setup in this channel.\n" + 
+				"Go to \'" + client.channels.get(raid.channel) + "\' for the right channel.");
 			return;
 		}
 
+
+		//Checks if user is permitted to signup. If not, return.
 		if(raid.allowedRoles[0] !== "everyone" && !(PermissionToSignUp(message.member, raid))) {
 			message.channel.send(message.author + ", I'm sorry, but you don't have permission to join \'" + raid.name + "\', "+
 				"as it is restricted to: " + raid.allowedRoles);
 			return;
 		}
 
+
+		//Get the sign up message
 		message.channel.fetchMessage(raid.currentSignupMsg).then(fetchedMsg => {
-			if(!CanFindAndManageUser(message, args[3])) { //Is messageAuthor allowed to add 
-				return; //other users and is it a valid username?
+
+			//Is message author allowed to add other users and is it a valid username?
+			if(!CanFindAndManageUser(message, args[3])) { 
+				return;
 			}
+
+			//Find out whether message author should be passed on, or the username from the argument (If any).
 			var userAlreadySigned = UserAlreadySignedReport(message, raid, args[3]);
 
-			switch (true) { //Is user already signed up?
+			//Checks if user is already signed up. If yes, return and tell the user.
+			switch (true) { 
 
-				case (userAlreadySigned[0] === 0): //If user is signed up to reserves
+				//If user is signed up to reserves
+				case (userAlreadySigned[0] === 0): 
 					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
-						args[0] + "\' as a reserve.");
+						raid.name + "\' as a reserve.");
 					return;
 
-				case (userAlreadySigned[0] === 1): //If user is signed up in list
+				//If user is signed up in list
+				case (userAlreadySigned[0] === 1): 
 					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
-						args[0] + "\' at a specified spot or as fill.");
+						raid.name + "\' at a specified spot or as fill.");
 					return;
 			}
 
+			//Checks if there are any spots left in the list/graph. If not, tell user.
 			if(raid.rolesAvailable.length === 0) {
 				message.channel.send(message.author + ", I'm sorry I couldn't sign you up, as there are no more spots left.\n" +
 					"Sign up as a reserve using \'~raidReserves " + raid.name + "\', or ask an officer to open up another raid.");
 				return;
 			}
 
+			//Checks whether the 2nd argument is a valid spot. Should be a number i, where 0 < i < 10. If invalid, tell user.
 			if(isNaN(parseInt(args[1])) || ((parseInt(args[1]) < 1) || (parseInt(args[1]) > 10))){
-				message.channel.send(message.author + ", \'" + args[1] + "\' is not a valid spot.\n" +
-					"Spot should be of type integer between 1 to 10. ~help raidAdd");
+				message.channel.send(message.author + ", 2nd argument, \'" + args[1] + "\' is not a valid spot.\n" +
+					"2nd argument should be a number i, where 0 < i < 11. ~help raidAdd");
 				return;
 			}
 
+			//Placing user in spot #0, adding additional info to the vertice, about which spot he tries to sign up to.
 			SetSourceVertex(raid.signUpGraph, [parseInt(args[1])], userAlreadySigned[1], args[2]);
+
+			//Using BFS to try and find a path from spot 0 (source vertex) to an empty spot vertex (empty spots = rolesAvailable).
 			BFS(raid.signUpGraph, raid.signUpGraph[0]);
 
+			//Sets a switchVertex to being either the empty spot vertex, or false if none exists.
 			var switchVertex = EmptySpotReachable(raid.signUpGraph, raid.rolesAvailable);
+
+			//Checks whether or not an empty spot vertex was found or not.
 			if(switchVertex) {
+				
+				//If yes, move everyone on the path one step towards the empty spot, making the wanted spot the new empty spot, which
+				 	//then can be replaced by the user wanted to sign up (vertex #0). Vertex #0 is then reset to empty values. 
 				PlaceSourceInList(raid.signUpGraph, switchVertex);
+
+				//Remove the switchVertex(the empty spot initially found using BFS) spot# from empty spots list (rolesAvailable.
 				raid.rolesAvailable.splice(raid.rolesAvailable.indexOf(switchVertex.spot), 1);
+
+				//Write to database file
 				UpdateJSON();
 
+				//Update sign up message, mentioning the user the desired spot(2nd argument), followed by the flavor text (3rd argument)
 				fetchedMsg.edit(RaidSetupMessage(raid));
+
+				//Tell user they're put on the sign up, and where they're placed.
 				message.channel.send(userAlreadySigned[1] + ", I've signed you up for spot #" + args[1] 
 					+ " in \'" + raid.name + "\'.");
 			} else {
+
+				//If a path to an empty spot can't be found, reset spot #0 (source vertex).
 				SetSourceVertex(raid.signUpGraph, [0], "", "");
+
+				//Write to JSON file.
 				UpdateJSON();
-				message.channel.send(userAlreadySigned[1] + ", I'm sorry. I couldn't sign you up for spot #" + args[1] + " in \'" +
-					raid.name + "\', as it's currently taken.");
+
+				//Notice user that the bot couldn't make the spot available.
+				message.channel.send(userAlreadySigned[1] + ", I'm sorry. Spot #" + args[1] + " in \'" +
+					raid.name + "\' is currently taken.");
 			}
 		}).catch(err =>{console.log("RaidAdd:\n" + err)});
 	} else
@@ -207,24 +246,31 @@ client.on("message", message => {
 	
 	if(command === prefix + "raidFill") {
 		/* ------------------------------ RAIDFILL ------------------------------
-		@param (args[0] = raidName) 		STRING
-		@param (args[>0] = discordName) 	STRING (atleast 1)
+		@param (args[0] = raidName) 	STRING
+		@param (args[1] = intervals) 	INTERVAL (atleast 1)
+		@param (args[2] = discordName)	STRING (optional)
 
-		Add author of message to the raidSignup as fill:
+		Add author of message/user to the raidSignup as fill:
 		*/
-		var raid = raidExists(args[0]);
+
+		//Checks if the raid exists. If not, end the command w/ helpful message.
+		var raid = raidExists(args[0]); //Either false or an index
 		if(!(raid || (raid === 0)) || raid.currentSignupMsg === "") {
 			message.channel.send("There currently is no signup for this raid: " + args[0]);
 			return;
 		}
 		raid = raidData[args[0]];
 
-		if(!RaidSetupInMessageChannel(message.channel.id, raidData[args[0]])) {
-			message.channel.send("\'" + args[0] + "\' is not setup in this channel.\n" + 
-				"Go to \'" + client.channels.get(raidData[args[0]].channel) + "\' for the right channel.");
+
+		//Checks whether the raid was initiated in the channel the command was called. If not, tell user which channel the raid is in.
+		if(!RaidSetupInMessageChannel(message.channel.id, raid)) {
+			message.channel.send("\'" + raid.name + "\' is not setup in this channel.\n" + 
+				"Go to \'" + client.channels.get(raid.channel) + "\' for the right channel.");
 			return;
 		}
 
+
+		//Checks if user is permitted to signup. If not, return.
 		if(raid.allowedRoles[0] !== "everyone" && !(PermissionToSignUp(message.member, raid))) {
 			message.channel.send(message.author + ", I'm sorry, but you don't have permission to join \'" + raid.name + "\', "+
 				"as it is restricted to: " + raid.allowedRoles);
@@ -232,37 +278,53 @@ client.on("message", message => {
 		}
 
 		message.channel.fetchMessage(raid.currentSignupMsg).then(fetchedMsg => {
+
+			//Is message author allowed to add other users and is it a valid username?
+			if(!CanFindAndManageUser(message, args[2])) { 
+				return;
+			}
+
+			//Find out whether message author should be passed on, or the username from the argument (If any).
 			var userAlreadySigned = UserAlreadySignedReport(message, raid, args[2]);
 
-			switch (true) { //Is user already signed up?
+			//Checks if user is already signed up. If yes, return and tell the user.
+			switch (true) { 
 
-				case (userAlreadySigned[0] === 0): //If user is signed up to reserves
+				//If user is signed up to reserves
+				case (userAlreadySigned[0] === 0): 
 					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
-						args[0] + "\' as a reserve.");
+						raid.name + "\' as a reserve.");
 					return;
 
-				case (userAlreadySigned[0] === 1): //If user is signed up in list
+				//If user is signed up in list
+				case (userAlreadySigned[0] === 1): 
 					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
-						args[0] + "\' at a specified spot or as fill.");
+						raid.name + "\' at a specified spot or as fill.");
 					return;
 			}
 
+			//Checks if there are any spots left in the list/graph. If not, tell user.
 			if(raid.rolesAvailable.length === 0) {
 				message.channel.send(message.author + ", I'm sorry I couldn't sign you up, as there are no more spots left.\n" +
 					"Sign up as a reserve using \'~raidReserves " + raid.name + "\', or ask an officer to open up another raid.");
 				return;
 			}
 
-			//var stringIntervals = args.slice(1);
+			//Places intervals in args[1] into an array with each interval being a seperate element.
 			var stringIntervals = args[1].split("+");
 
+			//If there aren't any given any intervals, tell user and return.
 			if(!stringIntervals || stringIntervals.length === 0) {
 				message.channel.send("Please add intervals/spots you'd like to fill.");
 				return;
 			}
 
+
+
+			//For all elements in stringIntervals, turn valid intervals("[7-10]" or "dps") => [7,10], find a nonvalid returns a string.
 			stringIntervals = (IntervalStringsToIntervals(stringIntervals));
 
+			//If interval is invalid (a string), tell user which exact interval was invalid and return.
 			if(typeof(stringIntervals) === "string") {
 				message.channel.send("\'" + stringIntervals + "\' is not a valid interval.\n" +
 					"Examples of valid intervals: [1-3], [6], chrono, druid, ps, dps, all\n" +
@@ -270,27 +332,52 @@ client.on("message", message => {
 				return;
 			}
 
+			//Turns [[7, 10], [5, 8]] => [7, 8, 9, 10, 5, 6, 7, 8] => [5, 6, 7, 8, 9, 10] (Each number in all intervals only appearing once.)
 			stringIntervals = (IntervalsToFullNumbers(stringIntervals));
 
+			//Turns [1, 2, 3, 4, 5] => "[1-5]"
 			var backToIntervalStrings = NumbersArrayToIntervalString(stringIntervals);
 
+
+
+			//Placing user in spot #0, adding additional info to the vertice, about which spots user tries to fill.
 			SetSourceVertex(raid.signUpGraph, stringIntervals,
 				userAlreadySigned[1].toString(), backToIntervalStrings);
 
+			//Using BFS to try and find a path from spot 0 (source vertex) to an empty spot vertex (empty spots = rolesAvailable).
 			BFS(raid.signUpGraph, raid.signUpGraph[0]);
 
+			//Sets a switchVertex to being either the empty spot vertex, or false if none exists.
 			var switchVertex = EmptySpotReachable(raid.signUpGraph, raid.rolesAvailable);
+
+			//Checks whether or not an empty spot vertex was found (switchVertex = false if not).
 			if(switchVertex) {
+				
+				//If yes, move everyone on the path one step towards the empty spot, making the wanted spot the new empty spot, which
+					//then can be replaced by the user wanted to sign up (vertex #0). Vertex #0 is then reset to empty values. 
 				PlaceSourceInList(raid.signUpGraph, switchVertex);
+
+				//Remove the switchVertex(the empty spot initially found using BFS) spot# from empty spots list (rolesAvailable.
 				raid.rolesAvailable.splice(raid.rolesAvailable.indexOf(switchVertex.spot), 1);
+
+				//Write to database file
 				UpdateJSON();
 
+				//Update sign up message, mentioning the user in the first available spot(1st argument), followed by the flavor text = intervals as strings.
 				fetchedMsg.edit(RaidSetupMessage(raid));
+
+				//Tell user they're put on the sign up, and where they're placed.
 				message.channel.send(userAlreadySigned[1] + ", I've signed you up in \'" + raid.name + 
 					"\', as fill for spots: " + backToIntervalStrings);
 			} else {
+
+				//If a path to an empty spot can't be found, reset spot #0 (source vertex).
 				SetSourceVertex(raid.signUpGraph, [0], "", "");
+
+				//Write to JSON file.
 				UpdateJSON();
+
+				//Notice user that the bot couldn't find an available spot.
 				message.channel.send(userAlreadySigned[1] + ", I'm sorry. I couldn't sign you up in \'" + raid.name + 
 					"\', as fill for spots: (" + backToIntervalStrings + "), as they're currently taken.");
 			}
@@ -306,19 +393,25 @@ client.on("message", message => {
 
 		Add author of message to the raidSignup as reserve:
 		*/
-		var raid = raidExists(args[0]);
+
+		//Checks if the raid exists. If not, end the command w/ helpful message.
+		var raid = raidExists(args[0]); //Either false or an index
 		if(!(raid || (raid === 0)) || raid.currentSignupMsg === "") {
 			message.channel.send("There currently is no signup for this raid: " + args[0]);
 			return;
 		}
 		raid = raidData[args[0]];
 
-		if(!RaidSetupInMessageChannel(message.channel.id, raidData[args[0]])) {
-			message.channel.send("\'" + args[0] + "\' is not setup in this channel.\n" + 
-				"Go to \'" + client.channels.get(raidData[args[0]].channel) + "\' for the right channel.");
+
+		//Checks whether the raid was initiated in the channel the command was called. If not, tell user which channel the raid is in.
+		if(!RaidSetupInMessageChannel(message.channel.id, raid)) {
+			message.channel.send("\'" + raid.name + "\' is not setup in this channel.\n" + 
+				"Go to \'" + client.channels.get(raid.channel) + "\' for the right channel.");
 			return;
 		}
 
+
+		//Checks if user is permitted to signup. If not, return.
 		if(raid.allowedRoles[0] !== "everyone" && !(PermissionToSignUp(message.member, raid))) {
 			message.channel.send(message.author + ", I'm sorry, but you don't have permission to join \'" + raid.name + "\', "+
 				"as it is restricted to: " + raid.allowedRoles);
@@ -326,27 +419,41 @@ client.on("message", message => {
 		}
 
 		message.channel.fetchMessage(raid.currentSignupMsg).then(fetchedMsg => {
-			if(!CanFindAndManageUser(message, args[1])) { //Is messageAuthor allowed to add 
-				return; //other users and is it a valid username?
+
+			//Is message author allowed to add other users and is it a valid username?
+			if(!CanFindAndManageUser(message, args[1])) { 
+				return;
 			}
+
+			//Find out whether message author should be passed on, or the username from the argument (If any).
 			var userAlreadySigned = UserAlreadySignedReport(message, raid, args[1]);
 
-			switch (true) { //Is user already signed up?
+			//Checks if user is already signed up. If yes, return and tell the user.
+			switch (true) { 
 
-				case (userAlreadySigned[0] === 0): //If user is signed up to reserves
+				//If user is signed up to reserves
+				case (userAlreadySigned[0] === 0): 
 					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
-						args[0] + "\' as a reserve.");
+						raid.name + "\' as a reserve.");
 					return;
 
-				case (userAlreadySigned[0] === 1): //If user is signed up in list
+				//If user is signed up in list
+				case (userAlreadySigned[0] === 1): 
 					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
-						args[0] + "\' at a specified spot or as a fill.");
+						raid.name + "\' at a specified spot or as fill.");
 					return;
 			}
 
+			//Push user onto reserve list
 			raid.reserves.push(userAlreadySigned[1].toString());
+
+			//Update database
 			UpdateJSON();
+
+			//Updates sign up message, mentioning user down in 'Reserves:'.
 			fetchedMsg.edit(RaidSetupMessage(raid));
+
+			//Tell user they're put on the sign up, and where they're placed.
 			message.channel.send(userAlreadySigned[1] + ", I've added you to \'" + raid.name + "\' as a reserve.")
 
 		}).catch(err =>{console.log("raidReserves:\n" + err)});
