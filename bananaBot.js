@@ -468,17 +468,20 @@ client.on("message", message => {
 
 		Remove author of message from raidSignUp:
 		*/
-		var raid = raidExists(args[0]);
-		if(!(raid || (raid === 0)) || raid.currentSignupMsg === "") { //Does raid exist?
+
+		//Checks if the raid exists. If not, tell user and return.
+		var raid = raidExists(args[0]); //Either false or an index
+		if(!(raid || (raid === 0)) || raid.currentSignupMsg === "") {
 			message.channel.send("There currently is no signup for this raid: " + args[0]);
-			return; //If no, stop.
+			return;
 		}
 		raid = raidData[args[0]];
 
 
-		if(!RaidSetupInMessageChannel(message.channel.id, raidData[args[0]])) {
-			message.channel.send("\'" + args[0] + "\' is not setup in this channel.\n" + 
-				"Go to \'" + client.channels.get(raidData[args[0]].channel) + "\' for the right channel.");
+		//Checks whether the raid was initiated in the channel the command was called. If not, tell user which channel the raid is in.
+		if(!RaidSetupInMessageChannel(message.channel.id, raid)) {
+			message.channel.send("\'" + raid.name + "\' is not setup in this channel.\n" + 
+				"Go to \'" + client.channels.get(raid.channel) + "\' for the right channel.");
 			return;
 		}
 
@@ -1148,6 +1151,69 @@ function UpdateJSON() {
 	fs.writeFile("./raidData.json", JSON.stringify(raidData), (err) => {
 		if (err) console.error(err); //log errors
 	});
+}
+
+/*
+
+
+Checking information about user/sign up list/message content, with error handling
+
+
+*/
+
+function CheckRaidExists(message, raidName) {
+	//Checks if the raid exists. If not tell user and return false.
+	var raid = raidExists(raidName); //Either false or an index
+	if(!(raid || (raid === 0)) || raid.currentSignupMsg === "") {
+		message.channel.send("There currently is no signup for this raid: " + raidName);
+		return false;
+	} else {
+		return raidData[raidName];
+	}
+}
+
+function CheckInRightChannel(message, raid) {
+	//Checks whether the raid was initiated in the channel the command was called. If not, tell user which channel the raid is in.
+	if(!RaidSetupInMessageChannel(message.channel.id, raid)) {
+		message.channel.send("\'" + raid.name + "\' is not setup in this channel.\n" + 
+			"Go to \'" + client.channels.get(raid.channel) + "\' for the right channel.");
+		return false;
+	} else {
+		return true;
+	}
+}
+
+function CheckAllowedRoles(message, raid) {
+	//Checks if user is permitted to signup. If not, return.
+	if(raid.allowedRoles[0] !== "everyone" && !(PermissionToSignUp(message.member, raid))) {
+		message.channel.send(message.author + ", I'm sorry, but you don't have permission to join \'" + raid.name + "\', "+
+			"as it is restricted to: " + raid.allowedRoles);
+		return false;
+	} else {
+		return true;
+	}
+}
+
+function CheckUserAlreadySigned(message, raid, userAlreadySigned) {
+
+	//Checks if user is already signed up. If yes, return and tell the user.
+	switch (true) { 
+
+		//If user is signed up to reserves
+		case (userAlreadySigned[0] === 0): 
+			message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
+				raid.name + "\' as a reserve.");
+			return false;
+
+		//If user is signed up in list
+		case (userAlreadySigned[0] === 1): 
+			message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
+				raid.name + "\' at a specified spot or as fill.");
+			return false;
+
+		default:
+			return true;
+	}
 }
 
 /**************************************************************************************
