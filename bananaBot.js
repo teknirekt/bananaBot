@@ -479,15 +479,15 @@ client.on("message", message => {
 			message.channel.send(message.author + ", you don't have permission to run this command.");
 			return;
 		}
-		var raid = raidExists(args[0]);
-		if(!(raid || (raid === 0))) { //Does raid exist?
-			message.channel.send("The raid \'" + args[0] + "\' hasn't yet been initialized.");
-			return; //If no, stop.
+		
+		//Checks if the raid exists. If not, end the command w/ helpful message.
+		var raid = CheckRaidExists(message, args[0]); //Either false or an index
+		if(!raid) {
+			return;
 		}
 
-		if(!RaidSetupInMessageChannel(message.channel.id, raidData[args[0]])) { //Right channel?
-			message.channel.send("\'" + args[0] + "\' is not setup in this channel.\n" + 
-				"Go to \'" + client.channels.get(raidData[args[0]].channel) + "\' for the right channel.");
+		//Checks whether the raid was initiated in the channel the command was called. If not, tell user which channel the raid is in.
+		if(!CheckInRightChannel(message, raid)) {
 			return;
 		}
 
@@ -535,17 +535,14 @@ client.on("message", message => {
 			message.channel.send(message.author + ", you don't have permission to run this command.");
 			return;
 		}
-		var raid = raidExists(args[0]);
-
-		if(!(raid || (raid === 0))) { //Does raid exist?
-			message.channel.send("The raid \'" + args[0] + "\' hasn't yet been initialized.");
-			return; //If no, stop.
+		//Checks if the raid exists. If not, end the command w/ helpful message.
+		var raid = CheckRaidExists(message, args[0]); //Either false or an index
+		if(!raid) {
+			return;
 		}
-		raid = raidData[args[0]];
 
-		if(!RaidSetupInMessageChannel(message.channel.id, raid)) {
-			message.channel.send("\'" + args[0] + "\' is not setup in this channel.\n" + 
-				"Go to \'" + client.channels.get(raid.channel) + "\' for the right channel.");
+		//Checks whether the raid was initiated in the channel the command was called. If not, tell user which channel the raid is in.
+		if(!CheckInRightChannel(message, raid)) {
 			return;
 		}
 
@@ -578,17 +575,15 @@ client.on("message", message => {
 			message.channel.send(message.author + ", you don't have permission to run this command.");
 			return;
 		}
-		var raid = raidExists(args[0]);
-
-		if(!(raid || (raid === 0))) { //Does raid exist?
-			message.channel.send("The raid \'" + args[0] + "\' hasn't yet been initialized.");
-			return; //If no, stop.
+		
+		//Checks if the raid exists. If not, end the command w/ helpful message.
+		var raid = CheckRaidExists(message, args[0]); //Either false or an index
+		if(!raid) {
+			return;
 		}
-		raid = raidData[args[0]];
 
-		if(!RaidSetupInMessageChannel(message.channel.id, raid)) {
-			message.channel.send("\'" + args[0] + "\' is not setup in this channel.\n" + 
-				"Go to \'" + client.channels.get(raid.channel) + "\' for the right channel.");
+		//Checks whether the raid was initiated in the channel the command was called. If not, tell user which channel the raid is in.
+		if(!CheckInRightChannel(message, raid)) {
 			return;
 		}
 
