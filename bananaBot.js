@@ -240,26 +240,18 @@ client.on("message", message => {
 		*/
 
 		//Checks if the raid exists. If not, end the command w/ helpful message.
-		var raid = raidExists(args[0]); //Either false or an index
-		if(!(raid || (raid === 0)) || raid.currentSignupMsg === "") {
-			message.channel.send("There currently is no signup for this raid: " + args[0]);
+		var raid = CheckRaidExists(message, args[0]); //Either false or an index
+		if(!raid) {
 			return;
 		}
-		raid = raidData[args[0]];
-
 
 		//Checks whether the raid was initiated in the channel the command was called. If not, tell user which channel the raid is in.
-		if(!RaidSetupInMessageChannel(message.channel.id, raid)) {
-			message.channel.send("\'" + raid.name + "\' is not setup in this channel.\n" + 
-				"Go to \'" + client.channels.get(raid.channel) + "\' for the right channel.");
+		if(!CheckInRightChannel(message, raid)) {
 			return;
 		}
 
-
 		//Checks if user is permitted to signup. If not, return.
-		if(raid.allowedRoles[0] !== "everyone" && !(PermissionToSignUp(message.member, raid))) {
-			message.channel.send(message.author + ", I'm sorry, but you don't have permission to join \'" + raid.name + "\', "+
-				"as it is restricted to: " + raid.allowedRoles);
+		if(!CheckAllowedRoles(message, raid)) {
 			return;
 		}
 
@@ -274,25 +266,12 @@ client.on("message", message => {
 			var userAlreadySigned = UserAlreadySignedReport(message, raid, args[2]);
 
 			//Checks if user is already signed up. If yes, return and tell the user.
-			switch (true) { 
-
-				//If user is signed up to reserves
-				case (userAlreadySigned[0] === 0): 
-					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
-						raid.name + "\' as a reserve.");
-					return;
-
-				//If user is signed up in list
-				case (userAlreadySigned[0] === 1): 
-					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
-						raid.name + "\' at a specified spot or as fill.");
-					return;
+			if(!CheckUserAlreadySigned(message, raid, userAlreadySigned)) {
+				return;
 			}
 
 			//Checks if there are any spots left in the list/graph. If not, tell user.
-			if(raid.rolesAvailable.length === 0) {
-				message.channel.send(message.author + ", I'm sorry I couldn't sign you up, as there are no more spots left.\n" +
-					"Sign up as a reserve using \'~raidReserves " + raid.name + "\', or ask an officer to open up another raid.");
+			if(!CheckAnySpotsLeft(message, raid)) {
 				return;
 			}
 
@@ -304,8 +283,6 @@ client.on("message", message => {
 				message.channel.send("Please add intervals/spots you'd like to fill.");
 				return;
 			}
-
-
 
 			//For all elements in stringIntervals, turn valid intervals("[7-10]" or "dps") => [7,10], find a nonvalid returns a string.
 			stringIntervals = (IntervalStringsToIntervals(stringIntervals));
@@ -381,29 +358,22 @@ client.on("message", message => {
 		*/
 
 		//Checks if the raid exists. If not, end the command w/ helpful message.
-		var raid = raidExists(args[0]); //Either false or an index
-		if(!(raid || (raid === 0)) || raid.currentSignupMsg === "") {
-			message.channel.send("There currently is no signup for this raid: " + args[0]);
+		var raid = CheckRaidExists(message, args[0]); //Either false or an index
+		if(!raid) {
 			return;
 		}
-		raid = raidData[args[0]];
-
 
 		//Checks whether the raid was initiated in the channel the command was called. If not, tell user which channel the raid is in.
-		if(!RaidSetupInMessageChannel(message.channel.id, raid)) {
-			message.channel.send("\'" + raid.name + "\' is not setup in this channel.\n" + 
-				"Go to \'" + client.channels.get(raid.channel) + "\' for the right channel.");
+		if(!CheckInRightChannel(message, raid)) {
 			return;
 		}
-
 
 		//Checks if user is permitted to signup. If not, return.
-		if(raid.allowedRoles[0] !== "everyone" && !(PermissionToSignUp(message.member, raid))) {
-			message.channel.send(message.author + ", I'm sorry, but you don't have permission to join \'" + raid.name + "\', "+
-				"as it is restricted to: " + raid.allowedRoles);
+		if(!CheckAllowedRoles(message, raid)) {
 			return;
 		}
 
+		//Grab the sign up message
 		message.channel.fetchMessage(raid.currentSignupMsg).then(fetchedMsg => {
 
 			//Is message author allowed to add other users and is it a valid username?
@@ -415,19 +385,8 @@ client.on("message", message => {
 			var userAlreadySigned = UserAlreadySignedReport(message, raid, args[1]);
 
 			//Checks if user is already signed up. If yes, return and tell the user.
-			switch (true) { 
-
-				//If user is signed up to reserves
-				case (userAlreadySigned[0] === 0): 
-					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
-						raid.name + "\' as a reserve.");
-					return;
-
-				//If user is signed up in list
-				case (userAlreadySigned[0] === 1): 
-					message.channel.send("User, " + userAlreadySigned[1] + ", is already signed up for \'" +
-						raid.name + "\' at a specified spot or as fill.");
-					return;
+			if(!CheckUserAlreadySigned(message, raid, userAlreadySigned)) {
+				return;
 			}
 
 			//Push user onto reserve list
@@ -455,19 +414,14 @@ client.on("message", message => {
 		Remove author of message from raidSignUp:
 		*/
 
-		//Checks if the raid exists. If not, tell user and return.
-		var raid = raidExists(args[0]); //Either false or an index
-		if(!(raid || (raid === 0)) || raid.currentSignupMsg === "") {
-			message.channel.send("There currently is no signup for this raid: " + args[0]);
+		//Checks if the raid exists. If not, end the command w/ helpful message.
+		var raid = CheckRaidExists(message, args[0]); //Either false or an index
+		if(!raid) {
 			return;
 		}
-		raid = raidData[args[0]];
-
 
 		//Checks whether the raid was initiated in the channel the command was called. If not, tell user which channel the raid is in.
-		if(!RaidSetupInMessageChannel(message.channel.id, raid)) {
-			message.channel.send("\'" + raid.name + "\' is not setup in this channel.\n" + 
-				"Go to \'" + client.channels.get(raid.channel) + "\' for the right channel.");
+		if(!CheckInRightChannel(message, raid)) {
 			return;
 		}
 
