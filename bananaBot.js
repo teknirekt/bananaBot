@@ -764,8 +764,10 @@ client.on("message", message => {
 			//If message author is botowner, set up the message and send it.
 			var richMsg = new Discord.RichEmbed()
 			.setTitle("How to use bananaBot for raid registration")
-			.setDescription("The guide is hosted on over at github, and would give you an understanding" +
-				" of the basics of using the bot. \nIf you have further questions do try the " + prefix + "help" +
+			.setDescription("If it is your first time using bananaBot, I **highly recommend** you to take " +
+				"2 minutes of your time to read the small guide to avoid struggling.\n" + 
+				"The guide is hosted on over at github, and will learn you the basics of using the bot for raid registration\n" +
+				"If you have further questions do try the " + prefix + "help" +
 				" command, or DM me @XLOlsen#5081")
 			.setFooter("Live for Banana", "https://cdn.drawception.com/images/panels/2014/8-5/Xek68GTmsX-11.png")
 			.setTimestamp()
