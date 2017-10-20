@@ -673,7 +673,7 @@ client.on("message", message => {
 
 		//Tell user the raid was setup, and what options the user have chosen for the raid.
 		message.channel.send(message.author + ", I've added \'" + args[0] + "\' to available raids." +
-			"\nThe raid is setup in this channel, \'" + message.channel.id + "\'." + 
+			"\nThe raid is setup in this channel, \'" + client.channels.get(message.channel.id) + "\'." + 
 			"\nPeople who are able to join: " + (raidData[args[0]].allowedRoles.join(", ")));
 	} else
 
@@ -1052,7 +1052,8 @@ function RaidSetupMessage(raid) {
 		"The list has been reset, so please tell me whatever role you'd like to fill! \n \n" +
 
 		"If you're not familiar with the bosses please take a look at the guides in #raid-guides. I hope to see you all. Happy raiding!" + 
-		"\n(To sign up use the raidAdd command. Example \'" + prefix + "raidAdd " + raid.name + " 5 CPS\')");
+		"\n(To sign up use either raidAdd/raidFill command or be reserve with raidReserves command. \n" +
+		"Use " + prefix + "help command if you're in doubt.");
 }
 
 
