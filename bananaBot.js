@@ -12,20 +12,6 @@ const highRoles = require("./settings.json").highRoles; //The roles within your 
 const coreMembers = require("./settings.json").coreMembers; //The role of your core raid team (if any).
 const guildMembers = require("./settings.json").guildMembers; //All roles assigned to members of your guild.
 
-//Following are all the help command txt's as variables.
-const infoTXT = fs.readFileSync("commands/info.txt", "utf8");
-const commandsTXT = fs.readFileSync("commands/commands.txt", "utf8");
-const deleteRaidTXT = fs.readFileSync("commands/deleteRaid.txt", "utf8");
-const listRaidsTXT = fs.readFileSync("commands/listRaids.txt", "utf8");
-const newRaidTXT = fs.readFileSync("commands/newRaid.txt", "utf8");
-const raidAddTXT = fs.readFileSync("commands/raidAdd.txt", "utf8");
-const raidFillTXT = fs.readFileSync("commands/raidFill.txt", "utf8");
-const raidReservesTXT = fs.readFileSync("commands/raidReserves.txt", "utf8");
-const raidRemoveTXT = fs.readFileSync("commands/raidRemove.txt", "utf8");
-const raidSetupTXT = fs.readFileSync("commands/raidSetup.txt", "utf8");
-const setRLTXT = fs.readFileSync("commands/setRL.txt", "utf8");
-const clearRLTXT = fs.readFileSync("commands/clearRL.txt", "utf8");
-
 let raidData = JSON.parse(fs.readFileSync("./raidData.json", "utf8"));
 
 client.on("ready",() => {
@@ -37,7 +23,6 @@ client.on("ready",() => {
 client.on("message", message => {
 	let args = message.content.split(" ").slice(1); // returns an array with string arguments who were separated by space.
 	let command = message.content.split(" ")[0];
-	argsResult = args.join(" "); //concatinates the args Array
 
 	if(!message.content.startsWith(prefix)) return; //If message doesn't contain the bot prefix, the bot ignores the message
 
@@ -64,7 +49,7 @@ client.on("message", message => {
 
 		Prints out info message.
 		*/
-		message.channel.send("```" + infoTXT + "```");
+		message.channel.send("```" + fs.readFileSync("commands/info.txt", "utf8") + "```");
 	} else 
 
 
@@ -78,47 +63,47 @@ client.on("message", message => {
 		switch (args[0]) {
 
 			case "deleteRaid":
-				message.channel.send("```" + deleteRaidTXT + "```");
+				message.channel.send("```" + fs.readFileSync("commands/deletRaid.txt", "utf8") + "```");
 				break;
 
 			case "listRaids":
-				message.channel.send("```" + listRaidsTXT + "```");
+				message.channel.send("```" + fs.readFileSync("commands/listRaids.txt", "utf8") + "```");
 				break;
 
 			case "newRaid":
-				message.channel.send("```" + newRaidTXT + "```");
+				message.channel.send("```" + fs.readFileSync("commands/newRaid.txt", "utf8") + "```");
 				break;
 
 			case "raidAdd":
-				message.channel.send("```" + raidAddTXT + "```");
+				message.channel.send("```" + fs.readFileSync("commands/raidAdd.txt", "utf8") + "```");
 				break;
 
 			case "raidFill":
-				message.channel.send("```" + raidFillTXT + "```");
+				message.channel.send("```" + fs.readFileSync("commands/raidFill.txt", "utf8") + "```");
 				break;
 
 			case "raidReserves":
-				message.channel.send("```" + raidReservesTXT + "```");
+				message.channel.send("```" + fs.readFileSync("commands/raidReserves.txt", "utf8") + "```");
 				break;
 
 			case "raidRemove":
-				message.channel.send("```" + raidRemoveTXT + "```");
+				message.channel.send("```" + fs.readFileSync("commands/raidRemove.txt", "utf8") + "```");
 				break;
 
 			case "raidSetup":
-				message.channel.send("```" + raidSetupTXT + "```");
+				message.channel.send("```" + fs.readFileSync("commands/raidSetup.txt", "utf8") + "```");
 				break;
 
 			case "setRL":
-				message.channel.send("```" + setRLTXT + "```");
+				message.channel.send("```" + fs.readFileSync("commands/setRL.txt", "utf8") + "```");
 				break;
 
 			case "clearRL":
-				message.channel.send("```" + clearRLTXT + "```");
+				message.channel.send("```" + fs.readFileSync("commands/clearRL.txt", "utf8") + "```");
 				break;
 
 			default:
-				message.channel.send("```" + commandsTXT + "```");
+				message.channel.send("```" + fs.readFileSync("commands/commands.txt", "utf8") + "```");
 		}
 	} else
 
@@ -181,7 +166,7 @@ client.on("message", message => {
 			//Checks whether the 2nd argument is a valid spot. Should be a number i, where 0 < i < 10. If invalid, tell user.
 			if(isNaN(parseInt(args[1])) || ((parseInt(args[1]) < 1) || (parseInt(args[1]) > 10))){
 				message.channel.send(message.author + ", 2nd argument, \'" + args[1] + "\' is not a valid spot.\n" +
-					"2nd argument should be a number i, where 0 < i < 11. ~help raidAdd");
+					"2nd argument should be a number i, where 0 < i < 11. " + prefix + "help raidAdd");
 				return;
 			}
 
@@ -291,7 +276,7 @@ client.on("message", message => {
 			if(typeof(stringIntervals) === "string") {
 				message.channel.send("\'" + stringIntervals + "\' is not a valid interval.\n" +
 					"Examples of valid intervals: [1-3], [6], chrono, druid, ps, dps, all\n" +
-					"~help raidFill");
+					"" + prefix + "help raidFill");
 				return;
 			}
 
@@ -491,6 +476,7 @@ client.on("message", message => {
 			return;
 		}
 
+		//Checking if the user added enough arguments. If not, tell user and return.
 		if(args.length < 5) {
 			message.channel.send("Please fill in 5 arguments (raid, day, date, time, timezone). \nArguments are separated by spaces\n" +
 				"Example: trainingRaid Saturday 24/12 8pm CEST");
@@ -498,30 +484,34 @@ client.on("message", message => {
 
 		} 
 
-		if(raidData[args[0]].channel && raidData[args[0]].currentSignupMsg) { //Delete previous signup message.
-			client.channels.get(raidData[args[0]].channel)
-				.fetchMessage(raidData[args[0]].currentSignupMsg).then(fetchedMsg => {
+		//If the raid has a sign up message prior to the command call find it, and delete it.
+		if(raid.channel && raid.currentSignupMsg) { //Delete previous signup message.
+			client.channels.get(raid.channel)
+				.fetchMessage(raid.currentSignupMsg).then(fetchedMsg => {
         
+        			//Tell user that the previous message gets deleted.
 					message.channel.send("Deleting previous raidSignUp message from channel \'" + 
-						client.channels.get(raidData[args[0]].channel) + "\'.");
+						client.channels.get(raid.channel) + "\'.");
+					//Log the message into the console before it's deleted.
 					console.log(new Date() + "\n" + fetchedMsg);
 					fetchedMsg.delete();
 				}).catch(err =>{console.log("raidSetup, deletePrevFetchedMsg:\n" + err)});
 		}
 
 		//Make a new raid with given inputs, and all slots empty
-		raidData[args[0]].day = args[1];
-		raidData[args[0]].date = args[2];
-		raidData[args[0]].time = args[3];
-		raidData[args[0]].timezone = args[4];
-		raidData[args[0]].rolesAvailable = [1,2,3,4,5,6,7,8,9,10];
-		raidData[args[0]].signUpGraph = new SignUpGraph();
-		raidData[args[0]].reserves = [];
+		raid.day = args[1];
+		raid.date = args[2];
+		raid.time = args[3];
+		raid.timezone = args[4];
+		raid.rolesAvailable = [1,2,3,4,5,6,7,8,9,10];
+		raid.signUpGraph = new SignUpGraph();
+		raid.reserves = [];
 		UpdateJSON();
 
-		message.channel.send(RaidSetupMessage(raidData[args[0]])).then((msg, msgs) => {
-			raidData[args[0]].currentSignupMsg = msg.id;
-			raidData[args[0]].channel = msg.channel.id;
+		//Send the sign up message in the channel, set it as current msg and pin it.
+		message.channel.send(RaidSetupMessage(raid)).then((msg, msgs) => {
+			raid.currentSignupMsg = msg.id;
+			raid.channel = msg.channel.id;
 			msg.pin();
 			UpdateJSON();
 		}).catch(err =>{console.log("raidSetup, sendMessage:\n" + err)});
@@ -531,10 +521,12 @@ client.on("message", message => {
 
 	if(command === prefix + "setRL") {
 		
+		//Check if user is allowed to set a raid leader.
 		if(!HigherPermission(message.member)) {
 			message.channel.send(message.author + ", you don't have permission to run this command.");
 			return;
 		}
+
 		//Checks if the raid exists. If not, end the command w/ helpful message.
 		var raid = CheckRaidExists(message, args[0]); //Either false or an index
 		if(!raid) {
@@ -546,16 +538,21 @@ client.on("message", message => {
 			return;
 		}
 
+		//If a username is passed (2nd argument), and the user can't be found. Tell user and return.
 		if(args[1] && !UserExists(args[1])) {
 			message.channel.send(message.author + ", I can't find user: " + args[1]);
 			return;
 		}
 
+		//Determine whether or not the message author or a user passed through argument is to be raid leader.
+		//Will always be the 2nd argument, if 2nd argument exists and is a valid username.
 		var userToAdd = SelfOrAnotherUser(message, args[1]);
 
+		//Set raidleader
 		raid.raidLeader = userToAdd.toString();
 		UpdateJSON();
 
+		//If there's a current sign up message, update it with new info. If not, do nothing.
 		if(raid.currentSignupMsg !== "") {
 			message.channel.fetchMessage(raid.currentSignupMsg)
 				.then(fetchedMsg => {
@@ -563,6 +560,7 @@ client.on("message", message => {
 			});
 		}
 
+		//Say in chat, that a new raid leader has been set.
 		message.channel.send("I've set " + raid.raidLeader + " as raid leader for \'" +
 			raid.name + "\'.");
 	} else 
@@ -571,6 +569,7 @@ client.on("message", message => {
 
 	if(command === prefix + "clearRL") {
 
+		//Check if user is allowed to clear raid leader.
 		if(!HigherPermission(message.member)) {
 			message.channel.send(message.author + ", you don't have permission to run this command.");
 			return;
@@ -587,9 +586,11 @@ client.on("message", message => {
 			return;
 		}
 
+		//Clear raid leader
 		raid.raidLeader = "None";
 		UpdateJSON();
 
+		//If there's a current sign up msg, update it with the new info, if not do nothing.
 		if(raid.currentSignupMsg !== "") {
 			message.channel.fetchMessage(raid.currentSignupMsg)
 				.then(fetchedMsg => {
@@ -597,6 +598,7 @@ client.on("message", message => {
 			});
 		}
 
+		//Tell chat that you cleared the raid leader.
 		message.channel.send("I've cleared the raid leader for \'" + raid.name + "\'.");
 	} else
 
@@ -612,40 +614,48 @@ client.on("message", message => {
 	if(command === prefix + "newRaid") {
 		/* ------------------------------ NEWRAID ------------------------------
 		@param (args[0] = raidName) 		STRING
+		@param (args[1] = permission)
 
 		Adds a new raid to available raids, @the channel the command was posted in.	
 		*/
-		if(!HigherPermission(message.member)) { //Does message author have permission?
+
+		//Check if user is allowed to create new raids.
+		if(!HigherPermission(message.member)) {
 			message.channel.send(message.author + ", you don't have permission for this command.");
 			return;
 		}
-
-		if(!raidData["availableRaids"]) raidData["availableRaids"] = { //If availableRaids doesn't exist
-			//Initialize with blank data
+		//If availableRaids doesn't exist, initialize it with blank data
+		if(!raidData["availableRaids"]) raidData["availableRaids"] = { 
 			raids: []
 		};
 		UpdateJSON();
 
+		//If no raidName is passed (1st argument), tell user and return.
 		if(!args[0]) {
 			message.channel.send(message.author + ", please add the argument \'name\'. \n" +
 				"Example: " + prefix + "newRaid trainingRaid" );
 			return;
 		}
 
+		//Check if the raid already exists, if it does tell user and return.
 		if(raidExists(args[0]) === 0 || raidExists(args[0])) {
 			message.channel.send("The raid: \'" + args[0] + "\', already exists.")
 			return;
 		}
 
+		//Add the raidName to available raids.
 		raidData["availableRaids"].raids.push(args[0]);
 
+		//Set permissions based on whether 3 argument is core/guild/nothing
 		var permissions = ParseStringToRolesStringArray(args[1]);
+
+		//If no 2nd argument was passed/2nd argument couldn't be identified, set permission to everyone.
 		if(!permissions) {
 			permissions = ["everyone"];
 		}
 
+		//Initialize the new raid with blank data
 		raidData[args[0]] = {
-			//Initialize the new raid with blank data
 			name: args[0],
 			day: "",
 			date: "",
@@ -660,8 +670,11 @@ client.on("message", message => {
 			raidLeader: "None"
 		};
 		UpdateJSON();
-		message.channel.send(message.author + ", I've added \'" + args[0] + "\' to available raids.\n" +
-			"People who are able to join: " + (raidData[args[0]].allowedRoles.join(", ")));
+
+		//Tell user the raid was setup, and what options the user have chosen for the raid.
+		message.channel.send(message.author + ", I've added \'" + args[0] + "\' to available raids." +
+			"\nThe raid is setup in this channel, \'" + message.channel.id + "\'." + 
+			"\nPeople who are able to join: " + (raidData[args[0]].allowedRoles.join(", ")));
 	} else
 
 
@@ -672,22 +685,30 @@ client.on("message", message => {
 		
 		Deletes a raid, given it exists in availableRaids.
 		*/
+
+		//Checks if user is allowed to delete raids.
 		if(!HigherPermission(message.member)) {
 			message.channel.send(message.author + ", you don't have permission for this command.");
 			return;
 		}
+
+		//Check if user passed an argument, if not tell user and return.
 		if(!args[0]) {
 			message.channel.send(message.author + ", please add the argument \'name\'. \n" +
 				"Example: " + prefix + "deleteRaid trainingRaid" );
 			return;
 		}
 
+		//raidExist returns index of raid if raid exists and false if raid was not found.
 		var raidToDelete = raidExists(args[0]);		
 
+		//Check whether the raid exists or not
 		if(raidToDelete === 0 || raidToDelete) {
+			//If yes, delete it from available raids.
 			raidData["availableRaids"].raids.splice(raidToDelete, 1);
 
-			if(raidData[args[0]].currentSignupMsg) { //If there is a signUpMsg, then delete it
+			//If it had a message setup, delete the message and log it in console.
+			if(raidData[args[0]].currentSignupMsg) {
 				message.channel.send("Deleting SignUp message for \'" + args[0] + "\'.");
 				client.channels.get(raidData[args[0]].channel)
 					.fetchMessage(raidData[args[0]].currentSignupMsg).then(fetchedMsg => {
@@ -699,14 +720,17 @@ client.on("message", message => {
 					});
 					 
 			}
-
+			//Also delete info about the raid. (The JSON object)
 			delete raidData[args[0]];
 			UpdateJSON();
 			
+			//Tell user the command succeeded.
 			message.channel.send(message.author + ", I've deleted \'" + args[0] + "\' from available raids.")
 			return;
 		} else {
+			//If raid didn't exist, tell user and return.
 			message.channel.send("The raid \'" + args[0] + "\' doesn't exist.");
+			return;
 		}
 	} else
 
@@ -717,25 +741,31 @@ client.on("message", message => {
 	
 		Lists all raids available to setup.
 		*/
+		//If available raids JSON object doesn't exist, tell user and return.
 		if(!raidData["availableRaids"] || raidData["availableRaids"].raids.length === 0) {
 			message.channel.send("There currently are no available raids.");
 			return;
 		}
+		//If there are available raids send a list with information about name, channel and permissions.
 		message.channel.send("Available raids are: " + RaidsAvailableToString(raidData["availableRaids"].raids));
 	} else
 
 
 
 	if(command === prefix + "guide") {
+		/*
+		Posts a guide message linking to https://github.com/XLOlsen/bananaBot
+		*/
+
+		//If the message author is not the botowner, return.
 		if(message.author.id !== botOwner) {
-			console.log(message.author.id);
-			console.log(botOwner);
 			return;
 		} else {
+			//If message author is botowner, set up the message and send it.
 			var richMsg = new Discord.RichEmbed()
 			.setTitle("How to use bananaBot for raid registration")
 			.setDescription("The guide is hosted on over at github, and would give you an understanding" +
-				" of the basics of using the bot. \nIf you have further questions do try the ~help" +
+				" of the basics of using the bot. \nIf you have further questions do try the " + prefix + "help" +
 				" command, or DM me @XLOlsen#5081")
 			.setFooter("Live for Banana", "https://cdn.drawception.com/images/panels/2014/8-5/Xek68GTmsX-11.png")
 			.setTimestamp()
@@ -1022,7 +1052,7 @@ function RaidSetupMessage(raid) {
 		"The list has been reset, so please tell me whatever role you'd like to fill! \n \n" +
 
 		"If you're not familiar with the bosses please take a look at the guides in #raid-guides. I hope to see you all. Happy raiding!" + 
-		"\n(To sign up use the raidAdd command. Example \'~raidAdd " + raid.name + " 5 CPS\')");
+		"\n(To sign up use the raidAdd command. Example \'" + prefix + "raidAdd " + raid.name + " 5 CPS\')");
 }
 
 
@@ -1152,7 +1182,7 @@ function CheckAnySpotsLeft(message, raid) {
 	//Checks if there are any spots left in the list/graph. If not, tell user.
 	if(raid.rolesAvailable.length === 0) {
 		message.channel.send(message.author + ", I'm sorry I couldn't sign you up, as there are no more spots left.\n" +
-			"Sign up as a reserve using \'~raidReserves " + raid.name + "\', or ask an officer to open up another raid.");
+			"Sign up as a reserve using \'" + prefix + "raidReserves " + raid.name + "\', or ask an officer to open up another raid.");
 		return false;
 	} else {
 		return true;
