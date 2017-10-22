@@ -11,6 +11,7 @@ const botOwner = require("./settings.json").botOwner; //The discordID of the own
 const highRoles = require("./settings.json").highRoles; //The roles within your discord server of higher order (ex. officers and leaders).
 const coreMembers = require("./settings.json").coreMembers; //The role of your core raid team (if any).
 const guildMembers = require("./settings.json").guildMembers; //All roles assigned to members of your guild.
+const logChannel = require("./settings.json").logChannel; //The channel where you want to log sign up messages upon removal.
 
 let raidData = JSON.parse(fs.readFileSync("./raidData.json", "utf8"));
 
@@ -493,7 +494,7 @@ client.on("message", message => {
 					message.channel.send("Deleting previous raidSignUp message from channel \'" + 
 						client.channels.get(raid.channel) + "\'.");
 					//Log the message into the console before it's deleted.
-					console.log(new Date() + "\n" + fetchedMsg);
+					LogPreviousSignUpToLogChannel(raid, fetchedMsg);
 					fetchedMsg.delete();
 				}).catch(err =>{console.log("raidSetup, deletePrevFetchedMsg:\n" + err)});
 		}
@@ -712,7 +713,7 @@ client.on("message", message => {
 				message.channel.send("Deleting SignUp message for \'" + args[0] + "\'.");
 				client.channels.get(raidData[args[0]].channel)
 					.fetchMessage(raidData[args[0]].currentSignupMsg).then(fetchedMsg => {
-						console.log(new Date() + "\n" + fetchedMsg);
+						LogPreviousSignUpToLogChannel(raid, fetchedMsg);
 						fetchedMsg.delete();//Get channel=>message=>delete it
 
 					}).catch(error => {
@@ -766,7 +767,7 @@ client.on("message", message => {
 			.setTitle("How to use bananaBot for raid registration")
 			.setDescription("If it is your first time using bananaBot, I **highly recommend** you to take " +
 				"2 minutes of your time to read the small guide to give you a better experience using bananaBot.\n" + 
-				"The guide is hosted on over at github, and will teach you the basics of using the bot for raid registration\n" +
+				"The guide is hosted over at github, and will teach you the basics of using the bot for raid registration\n" +
 				"If you have further questions don't hesitate to try the " + prefix + "help" +
 				" command, or DM me @XLOlsen#5081")
 			.setFooter("Live for Banana", "https://cdn.drawception.com/images/panels/2014/8-5/Xek68GTmsX-11.png")
@@ -796,9 +797,13 @@ Make sure to update the token inside /settings.json
 *******************************************************************************
 ******************************************************************************/
 
-//Roles with higher permissions in an array as Strings
+/*
 
 
+Check if user is signed up already
+
+
+*/
 
 function UserInSignUpReserves(userToString, raid) {
 	/* ------------------------------ USERINSIGNUPRESERVE ------------------------------
@@ -819,7 +824,6 @@ function UserInSignUpReserves(userToString, raid) {
 	return false; //If user was not found in raid.reserves return false
 }
 
-
 function UserInSignUpList(userToString, raid) {
 	for (var i = 1; i < raid.signUpGraph.length; i++) {
 		if(raid.signUpGraph[i].discordID === userToString) {
@@ -828,7 +832,6 @@ function UserInSignUpList(userToString, raid) {
 	}
 	return false; //If user was not found in signUpGraph list return false
 }
-
 
 function UserAlreadySignedReport(message, raid, username) {
 	/* ----------------------- USERALREADYSIGNEDUPREPORT ------------------------
@@ -860,6 +863,13 @@ function UserAlreadySignedReport(message, raid, username) {
 	return [2, userToAdd];
 }
 
+/*
+
+
+Other functions
+
+
+*/
 
 function raidExists(raidName) {
 	/* ------------------------------ RAIDEXISTS ------------------------------
@@ -881,7 +891,6 @@ function raidExists(raidName) {
 	return false;
 }
 
-
 function HigherPermission(member) {
 	/* ------------------------------ HIGHERPERMISSION ------------------------------
 	@Param member DISCORDJS.USER: Pass the author of the message that prompted the command.
@@ -897,7 +906,6 @@ function HigherPermission(member) {
 	}
 }
 
-
 function PermissionToSignUp(member, raid) {
 	if(member.roles.some(r => raid.allowedRoles.includes(r.name))){
 		return true; //If member is 1 of the allowed roles, return true
@@ -905,7 +913,6 @@ function PermissionToSignUp(member, raid) {
 		return false; //if not return false.
 	}
 }
-
 
 function ParseStringToRolesStringArray(roleString) {
 	switch(roleString) {
@@ -922,7 +929,6 @@ function ParseStringToRolesStringArray(roleString) {
 		}
 }
 
-
 function AllowedRolesToString(raid) {
 	var resultString = "";
 	for (var i = 0; i < raid.allowedRoles.length; i++) {
@@ -936,7 +942,6 @@ function AllowedRolesToString(raid) {
 	}
 	return resultString.slice(0, -2);
 }
-
 
 function CanFindAndManageUser(message, username) {
 	/* ------------------------------ CANFINDANDMANAGEUSER ------------------------------
@@ -963,7 +968,6 @@ function CanFindAndManageUser(message, username) {
 	return true;
 }
 
-
 function UserExists (username) {
 	/* ------------------------------ USEREXISTS ------------------------------
 	@Param username STRING|UNDEFINED: Pass a name or nothing.
@@ -985,7 +989,6 @@ function UserExists (username) {
 	return true;
 }
 
-
 function SelfOrAnotherUser(message, username) {
 	/* ------------------------------ SELFORANOTHERUSER ------------------------------
 	@Param message DISCORDJS.MESSAGE: Pass the message that prompted the command.
@@ -1004,7 +1007,6 @@ function SelfOrAnotherUser(message, username) {
 	}
 	return selfOrAnotherUser;
 }
-
 
 function RaidSetupMessage(raid) {
 	/* ------------------------------ RAIDSETUPMESSAGE ------------------------------
@@ -1058,7 +1060,6 @@ function RaidSetupMessage(raid) {
 		"Use " + prefix + "help command if you're in doubt.");
 }
 
-
 function RaidReservesToString(raid){
 	/* ------------------------------ RAIDRESERVESTOSTRING ------------------------------
 	@Param raid JSON.OBJECT: Pass the object raidData[raidName] from raidData.json.
@@ -1076,7 +1077,6 @@ function RaidReservesToString(raid){
 
 	return resultString;
 }
-
 
 function RaidsAvailableToString(availableRaids) {
 	var resultString = "";
@@ -1098,7 +1098,6 @@ function RaidsAvailableToString(availableRaids) {
 	return resultString;
 }
 
-
 function RaidSetupInMessageChannel(channelID, raid) {
 	//Returns true if the raidSetup message was 
 	if(channelID === raid.channel) {
@@ -1108,7 +1107,6 @@ function RaidSetupInMessageChannel(channelID, raid) {
 	}
 }
 
-
 function UpdateJSON() {
 	/* ----------------------------- UPDATEJSON ------------------------------
 
@@ -1117,6 +1115,15 @@ function UpdateJSON() {
 	fs.writeFile("./raidData.json", JSON.stringify(raidData), (err) => {
 		if (err) console.error(err); //log errors
 	});
+}
+
+function LogPreviousSignUpToLogChannel(raid, logMessage) {
+	if(logChannel !== "") {
+		client.channels.get(logChannel).send((new Date()) + "\n" + logMessage);
+		return;
+	} else {
+		return;
+	}
 }
 
 /*

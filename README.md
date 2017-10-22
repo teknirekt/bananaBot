@@ -79,7 +79,7 @@ In short, they're there, as the name implies, to help you.
 
 2. Once created, you can setup a sign up message calling the ```~raidSetup``` command. Example ```~raidSetup trainingRaid Sunday 24/12 8pm CEST```, will setup a sign up message for the raid 'trainingRaid', with the information about when the raid will happen (Notice how each argument to the command is seperated by a space). When the ```~raidSetup``` command is called, the bot will create a sign up message and pin it to the channel. 
 
-3. Next up you can choose to add a raid leader, this is done with the ```~setRL``` command. You can either set yourself as raid leader, or let another one do the dirty work of leading the raid. Example ```~setRL XLOlsen``` (Note: when dealing with discord names, the discord.js framework is also case-sensitive when looking for users.).
+3. Next up you can choose to add a raid leader, this is done with the ```~setRL``` command. You can either set yourself as raid leader, or let another one do the dirty work of leading the raid. Example ```~setRL trainingRaid XLOlsen``` (Note: when dealing with discord names, the discord.js framework is also case-sensitive when looking for users.).
 
 You're done, the raid is set, and everyone can now happily sign up.
 
