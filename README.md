@@ -29,14 +29,16 @@ or add another remote, so you can still fetch upgrades:
 3. Create your own settings.json file
 
 Open an empty file, paste in: 
-```{	
+```
+{	
 	"token":"YOUR_TOKEN_GOES_HERE", 
 	"botOwner":"YOUR_DISCORD_ID_GOES_HERE",
 	"prefix":"~",
 	"highRoles":["YOUR_DISCORD_OFFICER_AND_LEADER_ROLE_NAMES_GO_HERE"],
 	"coreMembers":["YOUR_DISCORD_CORE_RAID_ROLE_NAME_GOES_HERE"],
 	"guildMembers":["YOUR_DISCORD_GUILDMEMBER_ROLE_NAME_GOES_HERE"]
-	}```
+} 
+```
 Then save this file in the same folder as the other files, naming it settings.json.
 That's it! Of course, place your own unique token that you got from https://discordapp.com/developers/applications/me in the file at YOUR_TOKEN_GOES_HERE, and fill in all the other stuff you'd like to customise.
 
