@@ -29,9 +29,16 @@ or add another remote, so you can still fetch upgrades:
 3. Create your own settings.json file
 
 Open an empty file, paste in: 
-```{"token":"YOUR_TOKEN_GOES_HERE", "botOwner":"YOUR_DISCORD_ID_GOES_HERE"}```
+```{	
+	"token":"YOUR_TOKEN_GOES_HERE", 
+	"botOwner":"YOUR_DISCORD_ID_GOES_HERE",
+	"prefix":"~",
+	"highRoles":["YOUR_DISCORD_OFFICER_AND_LEADER_ROLE_NAMES_GO_HERE"],
+	"coreMembers":["YOUR_DISCORD_CORE_RAID_ROLE_NAME_GOES_HERE"],
+	"guildMembers":["YOUR_DISCORD_GUILDMEMBER_ROLE_NAME_GOES_HERE"]
+	}```
 Then save this file in the same folder as the other files, naming it settings.json.
-That's it! Of course, place your own unique token that you got from https://discordapp.com/developers/applications/me in the file between the quotes, aswell as your own personal discord ID.
+That's it! Of course, place your own unique token that you got from https://discordapp.com/developers/applications/me in the file at YOUR_TOKEN_GOES_HERE, and fill in all the other stuff you'd like to customise.
 
 4. Install latest Node.js version
 
@@ -46,12 +53,7 @@ After it's done, you should now have a node modules folder inside of your reposi
 
 6. Tinkering the bot to your needs
 
-For this next step, you'll require atleast some programming/javascript skills. As you might've noticed, this bot was made specifically for BNN's own needs, and not a general ease of use, so you'd have to go through alot of the code refactoring to your own needs. 
-Examples of specific to BNN/hardcoded stuff include but are not limited to:
-- Guild roles
-- The bot prefix '~'
-
-Honestly I'm not 100% sure anymore how much is specific to our guild, but you're free to go ahead and make it suit your needs! I've thrown an MIT License on this thing, so do whatever is not limited by the license.
+As of version bananaBot version 1.4.0, I've tried to make the bot more customizable, so it can be used in other guilds. This means most of the previous hardcoded stuff goes into the settings.json file, and can be customized from there. However the help messages (inside commands) all are hardcoded using the prefix ~ (tilde), which means, if you pick another prefix, you might want to go through all of the txt files inside of command and update them there. Other than that, go ahead and make the bot suit your needs!
 
 ### 2. Getting started with bananaBot
 
@@ -81,7 +83,12 @@ You're done, the raid is set, and everyone can now happily sign up.
 
 #### 2.2 Signing up for raids (Everyone)
 
-To sign up for a raid, first find out the raid name. This can be found by looking at the top of the sign up message. Second: Head on over to the channel the raid was setup. (This will be the same channel as the sign up message was sent). Third: sign up.
+To sign up for a raid you can go through this quick checklist:
+
+1.  Find out the raid name of the name you want to sign up to. This can be done calling the ```~listRaids``` command, or simply looking at the top of the sign up message of which you want to sign up to.
+2. Head on over to the channel the raid was setup in. This will be the same channel as the sign up message was sent. This information can also be found using the ```~listRaids``` command.
+3. Sign up. 
+
 If you're finding yourself typing the wrong name, or being in the wrong channel, the bot will let you know.
 
 You can sign up for a raid in 3 different ways. 

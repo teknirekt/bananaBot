@@ -1,6 +1,6 @@
 {
   "name": "bananabot",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Discord Bot for organizing raids in GW2",
   "main": "bananaBot.js",
   "scripts": {
