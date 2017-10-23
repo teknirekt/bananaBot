@@ -37,14 +37,10 @@ client.on("message", message => {
 		console.log("Testing...");
 	} else
 
-
-
 	if(command === prefix + "cookie") {
 		message.channel.send(message.author + ", thank you for the :cookie:\n Much appreciated :smiley:");
 	} else
 
-
-	
 	if(command === prefix + "info") {
 		/*------------------------------ INFO ------------------------------
 
@@ -52,8 +48,6 @@ client.on("message", message => {
 		*/
 		message.channel.send("```" + fs.readFileSync("commands/info.txt", "utf8") + "```");
 	} else 
-
-
 	
 	if (command === prefix + "help") { 	
 		/* ------------------------------ HELP ------------------------------
@@ -115,7 +109,6 @@ client.on("message", message => {
 
 
 	*/
-
 	
 	if(command === prefix + "raidAdd") {
 		/* ------------------------------ RAIDADD ------------------------------
@@ -213,8 +206,6 @@ client.on("message", message => {
 			}
 		}).catch(err =>{console.log("RaidAdd:\n" + err)});
 	} else
-
-
 	
 	if(command === prefix + "raidFill") {
 		/* ------------------------------ RAIDFILL ------------------------------
@@ -332,8 +323,6 @@ client.on("message", message => {
 			}
 		}).catch(err => {console.log(err)});
 	} else
-
-
 	
 	if(command === prefix + "raidReserves") {
 		/* ------------------------------ RAIDRESERVE ------------------------------
@@ -390,8 +379,6 @@ client.on("message", message => {
 		}).catch(err =>{console.log("raidReserves:\n" + err)});
 	} else
 
-
-	
 	if(command === prefix + "raidRemove") {
 		/* ------------------------------ RAIDREMOVE ------------------------------
 		@param (args[0] = raidName) 		STRING
@@ -447,8 +434,6 @@ client.on("message", message => {
 		}).catch(err =>{console.log("raidRemove:\n" + err)});
 	} else
 
-
-
 	if(command === prefix + "raidSetup") {
 		/* ------------------------------ RAIDSETUP ------------------------------
 		@param (args[0] = raidName) 		STRING
@@ -465,6 +450,14 @@ client.on("message", message => {
 			message.channel.send(message.author + ", you don't have permission to run this command.");
 			return;
 		}
+
+		//Checking if the user added enough arguments. If not, tell user and return.
+		if(args.length !== 5) {
+			message.channel.send("raidFill requires 5 arguments: (raid, day, date, time, timezone). \nArguments are separated by spaces\n" +
+				"Example: trainingRaid Saturday 24/12 8pm CEST");
+			return;
+
+		} 
 		
 		//Checks if the raid exists. If not, end the command w/ helpful message.
 		var raid = CheckRaidExists(message, args[0]); //Either false or an index
@@ -477,21 +470,13 @@ client.on("message", message => {
 			return;
 		}
 
-		//Checking if the user added enough arguments. If not, tell user and return.
-		if(args.length < 5) {
-			message.channel.send("Please fill in 5 arguments (raid, day, date, time, timezone). \nArguments are separated by spaces\n" +
-				"Example: trainingRaid Saturday 24/12 8pm CEST");
-			return;
-
-		} 
-
 		//If the raid has a sign up message prior to the command call find it, and delete it.
 		if(raid.channel && raid.currentSignupMsg) { //Delete previous signup message.
 			client.channels.get(raid.channel)
 				.fetchMessage(raid.currentSignupMsg).then(fetchedMsg => {
         
         			//Tell user that the previous message gets deleted.
-					message.channel.send("Deleting previous raidSignUp message from channel \'" + 
+					message.channel.send("Deleting previous raidSignUp message for \'" + raid.name + "\' from channel \'" + 
 						client.channels.get(raid.channel) + "\'.");
 					//Log the message into the console before it's deleted.
 					LogPreviousSignUpToLogChannel(raid, fetchedMsg);
@@ -517,8 +502,6 @@ client.on("message", message => {
 			UpdateJSON();
 		}).catch(err =>{console.log("raidSetup, sendMessage:\n" + err)});
 	} else
-
-
 
 	if(command === prefix + "setRL") {
 		
@@ -566,8 +549,6 @@ client.on("message", message => {
 			raid.name + "\'.");
 	} else 
 
-
-
 	if(command === prefix + "clearRL") {
 
 		//Check if user is allowed to clear raid leader.
@@ -603,6 +584,52 @@ client.on("message", message => {
 		message.channel.send("I've cleared the raid leader for \'" + raid.name + "\'.");
 	} else
 
+	if(command === prefix + "clearSUM") {
+		//First permission is checked:
+		if(!HigherPermission(message.member)) {
+			message.channel.send(message.author + ", you don't have permission to run this command.");
+			return;
+		}
+		
+		//Check if the right amount of arguments
+		if(args.length !== 1) {
+			message.channel.send(message.author + "clearSUM requires only 1 argument, (raidName)")
+			return;
+		}
+
+		//Checks if the raid exists. If not, end the command w/ helpful message.
+		var raid = CheckRaidExists(message, args[0]); //Either false or an index
+		if(!raid) {
+			return;
+		}
+
+		//Checks whether the raid was initiated in the channel the command was called. If not, tell user which channel the raid is in.
+		if(!CheckInRightChannel(message, raid)) {
+			return;
+		}
+
+		//If the raid has a sign up message prior to the command call find it, and delete it.
+		if(raid.currentSignupMsg !== "") { //Delete previous signup message.
+			client.channels.get(raid.channel)
+				.fetchMessage(raid.currentSignupMsg).then(fetchedMsg => {
+        
+        			//Tell user that the previous message gets deleted.
+					message.channel.send("Deleting active raidSignUp message for \'" + raid.name + "\' from channel \'" + client.channels.get(raid.channel) + "\'.");
+
+					//Log the message into the logChannel before it's deleted.
+					LogPreviousSignUpToLogChannel(raid, fetchedMsg);
+					fetchedMsg.delete();
+
+					//set currentSignupMsg to the empty string = sign up inactive
+					raid.currentSignupMsg = "";
+					UpdateJSON();
+				}).catch(err =>{console.log("clearSUM, deletePrevFetchedMsg:\n" + err)});
+		} else {
+			message.channel.send(message.author + ", there was no active sign up for \'" + raid.name + "\'.");
+			return;
+		}
+	} else
+
 	/*
 
 
@@ -610,7 +637,6 @@ client.on("message", message => {
 
 
 	*/
-
 
 	if(command === prefix + "newRaid") {
 		/* ------------------------------ NEWRAID ------------------------------
@@ -678,8 +704,6 @@ client.on("message", message => {
 			"\nPeople who are able to join: " + (raidData[args[0]].allowedRoles.join(", ")));
 	} else
 
-
-	
 	if(command === prefix + "deleteRaid") {
 		/* ------------------------------ DELETERAID ------------------------------
 		@param (args[0] = raidName) 		STRING
@@ -735,8 +759,6 @@ client.on("message", message => {
 		}
 	} else
 
-
-	
 	if(command === prefix + "listRaids") {
 		/* ------------------------------ LISTRAIDS ------------------------------
 	
@@ -750,8 +772,6 @@ client.on("message", message => {
 		//If there are available raids send a list with information about name, channel and permissions.
 		message.channel.send("Available raids are: " + RaidsAvailableToString(raidData["availableRaids"].raids));
 	} else
-
-
 
 	if(command === prefix + "guide") {
 		/*
@@ -1133,6 +1153,7 @@ Checking information about user/sign up list/message content, with error handlin
 
 
 */
+
 function CheckRaidExists(message, raidName) {
 	//Checks if the raid exists. If not tell user and return false.
 	var raid = raidExists(raidName); //Either false or an index
