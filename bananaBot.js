@@ -120,6 +120,19 @@ client.on("message", message => {
 		Add author of message/user to the raidSignup:
 		*/
 
+		//Check if enough arguments are passed
+		if(args.length !== 3 && args.length !== 4) {
+
+			//If message author is an officer
+			if(HigherPermission(message.member)) {
+				message.channel.send(message.author + ", raidAdd requires 3-4 arguments.\nraidAdd(raidName, roleIndex, roleDescription, discordName(optional)).");
+			} else {
+
+				message.channel.send(message.author + ", raidAdd requires 3 arguments.\nraidAdd(raidName, roleIndex, roleDescription).");
+			}
+			return;
+		}
+
 		//Checks if the raid exists. If not, end the command w/ helpful message.
 		var raid = CheckRaidExists(message, args[0]); //Either false or an index
 		if(!raid) {
@@ -133,6 +146,12 @@ client.on("message", message => {
 
 		//Checks if user is permitted to signup. If not, return.
 		if(!CheckAllowedRoles(message, raid)) {
+			return;
+		}
+
+		//Check if raid registration is active for raid.
+		if(raid.currentSignupMsg === "") {
+			message.channel.send(message.author + ", registration for the raid \'" + raid.name + "\' isn't active.");
 			return;
 		}
 
@@ -217,6 +236,19 @@ client.on("message", message => {
 		*/
 
 		//Checks if the raid exists. If not, end the command w/ helpful message.
+
+		if(args.length !== 2 && args.length !== 3) {
+
+			//If message author is an officer
+			if(HigherPermission(message.member)) {
+				message.channel.send(message.author + ", raidFill requires 2-3 arguments.\nraidFill(raidName, intervals, discordName(optional)).");
+			} else {
+
+				message.channel.send(message.author + ", raidFill requires 2 arguments.\nraidFill(raidName, intervals).");
+			}
+			return;
+		}
+
 		var raid = CheckRaidExists(message, args[0]); //Either false or an index
 		if(!raid) {
 			return;
@@ -229,6 +261,12 @@ client.on("message", message => {
 
 		//Checks if user is permitted to signup. If not, return.
 		if(!CheckAllowedRoles(message, raid)) {
+			return;
+		}
+
+		//Check if raid registration is active for raid.
+		if(raid.currentSignupMsg === "") {
+			message.channel.send(message.author + ", registration for the raid \'" + raid.name + "\' isn't active.");
 			return;
 		}
 
@@ -332,6 +370,18 @@ client.on("message", message => {
 		Add author of message to the raidSignup as reserve:
 		*/
 
+		if(args.length !== 1 && args.length !== 2) {
+
+			//If message author is an officer
+			if(HigherPermission(message.member)) {
+				message.channel.send(message.author + ", raidReserves requires 1 or 2 arguments.\nraidReserves(raidName, discordName(optional)).");
+			} else {
+
+				message.channel.send(message.author + ", raidReserves requires 1 argument.\nraidReserves(raidName).");
+			}
+			return;
+		}
+
 		//Checks if the raid exists. If not, end the command w/ helpful message.
 		var raid = CheckRaidExists(message, args[0]); //Either false or an index
 		if(!raid) {
@@ -345,6 +395,12 @@ client.on("message", message => {
 
 		//Checks if user is permitted to signup. If not, return.
 		if(!CheckAllowedRoles(message, raid)) {
+			return;
+		}
+		
+		//Check if raid registration is active for raid.
+		if(raid.currentSignupMsg === "") {
+			message.channel.send(message.author + ", registration for the raid \'" + raid.name + "\' isn't active.");
 			return;
 		}
 
@@ -387,6 +443,18 @@ client.on("message", message => {
 		Remove author of message from raidSignUp:
 		*/
 
+		if(args.length !== 1 && args.length !== 2) {
+
+			//If message author is an officer
+			if(HigherPermission(message.member)) {
+				message.channel.send(message.author + ", raidRemove requires 1 or 2 arguments.\nraidRemove(raidName, discordName(optional)).");
+			} else {
+
+				message.channel.send(message.author + ", raidRemove requires 1 argument.\nraidRemove(raidName).");
+			}
+			return;
+		}
+
 		//Checks if the raid exists. If not, end the command w/ helpful message.
 		var raid = CheckRaidExists(message, args[0]); //Either false or an index
 		if(!raid) {
@@ -395,6 +463,12 @@ client.on("message", message => {
 
 		//Checks whether the raid was initiated in the channel the command was called. If not, tell user which channel the raid is in.
 		if(!CheckInRightChannel(message, raid)) {
+			return;
+		}
+
+		//Check if raid registration is active for raid.
+		if(raid.currentSignupMsg === "") {
+			message.channel.send(message.author + ", registration for the raid \'" + raid.name + "\' isn't active.");
 			return;
 		}
 
@@ -511,6 +585,12 @@ client.on("message", message => {
 			return;
 		}
 
+		//Check amount of arguments passed
+		if(args.length !== 1 && args.length !== 2) {
+			message.channel.send(message.author + " setRL requires 1-2 arguments.\nsetRL(raidName, discordName(optional))");
+			return;
+		}
+
 		//Checks if the raid exists. If not, end the command w/ helpful message.
 		var raid = CheckRaidExists(message, args[0]); //Either false or an index
 		if(!raid) {
@@ -556,6 +636,12 @@ client.on("message", message => {
 			message.channel.send(message.author + ", you don't have permission to run this command.");
 			return;
 		}
+
+		//Check amount of arguments passed
+		if(args.length !== 1) {
+			message.channel.send(message.author + " clearRL requires 1 argument.\nclearRL(raidName)");
+			return;
+		}
 		
 		//Checks if the raid exists. If not, end the command w/ helpful message.
 		var raid = CheckRaidExists(message, args[0]); //Either false or an index
@@ -593,7 +679,7 @@ client.on("message", message => {
 		
 		//Check if the right amount of arguments
 		if(args.length !== 1) {
-			message.channel.send(message.author + "clearSUM requires only 1 argument, (raidName)")
+			message.channel.send(message.author + "clearSUM requires 1 argument\nclearSUM(raidName)")
 			return;
 		}
 
@@ -651,18 +737,19 @@ client.on("message", message => {
 			message.channel.send(message.author + ", you don't have permission for this command.");
 			return;
 		}
+
+		//Check amount of arguments
+		if(args.length !== 1 && args.length !== 2) {
+			message.channel.send(message.author + ", newRaid requires 1-2 arguments.\nnewRaid(raidName, permission(optional))");
+			return;
+		}
+
 		//If availableRaids doesn't exist, initialize it with blank data
 		if(!raidData["availableRaids"]) raidData["availableRaids"] = { 
 			raids: []
 		};
 		UpdateJSON();
 
-		//If no raidName is passed (1st argument), tell user and return.
-		if(!args[0]) {
-			message.channel.send(message.author + ", please add the argument \'name\'. \n" +
-				"Example: " + prefix + "newRaid trainingRaid" );
-			return;
-		}
 
 		//Check if the raid already exists, if it does tell user and return.
 		if(raidExists(args[0]) === 0 || raidExists(args[0])) {
@@ -717,10 +804,9 @@ client.on("message", message => {
 			return;
 		}
 
-		//Check if user passed an argument, if not tell user and return.
-		if(!args[0]) {
-			message.channel.send(message.author + ", please add the argument \'name\'. \n" +
-				"Example: " + prefix + "deleteRaid trainingRaid" );
+		//Check amount of arguments
+		if(args.length !== 1) {
+			message.channel.send(message.author + ", deleteRaid requires 1 arguments.\ndeleteRaid(raidName, permission(optional))");
 			return;
 		}
 
@@ -764,6 +850,12 @@ client.on("message", message => {
 	
 		Lists all raids available to setup.
 		*/
+		//Check amount of arguments
+		if(args.length !== 0) {
+			message.channel.send(message.author + ", listRaid takes no arguments.\nlistRaids()");
+			return;
+		}
+
 		//If available raids JSON object doesn't exist, tell user and return.
 		if(!raidData["availableRaids"] || raidData["availableRaids"].raids.length === 0) {
 			message.channel.send("There currently are no available raids.");
