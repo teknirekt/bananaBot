@@ -1,6 +1,6 @@
-Command: clearRL
+Command: clearRL(raidName)
 
-@param (args[0] = raidName) STRING
+1. raidName = Name of the raid for which you're trying to clear the raid leader.
 
 Sets raid leader of raid to 'None'.
 

@@ -1,7 +1,7 @@
-Command: newRaid
+Command: newRaid(raidName, permission(optional))
 
-@param (args[0] = raidName)	STRING
-@param (args[1] = permission) STRING (optional)
+1. raidName = Name of the raid for which you're trying to clear the registration messsage.
+2. permission = Group of people allowed to join the raid. (Optional)
 
 Adds a new raid to available raids, limited to the channel where the command is called.
 

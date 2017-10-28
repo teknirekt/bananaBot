@@ -1,4 +1,4 @@
-Command: listRaids
+Command: listRaids()
 
 Lists all raids available to setup.
 

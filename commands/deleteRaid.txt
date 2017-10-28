@@ -1,6 +1,6 @@
-Command: deleteRaid
+Command: deleteRaid(raidName)
 
-@param (args[0] = raidName)	STRING
+1. raidName = Name of the raid for which you're trying to delete.
 
 Deletes a raid, given it exists in availableRaids.
 Also deletes the raid sign up message, if one such exists.

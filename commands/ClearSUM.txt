@@ -1,0 +1,8 @@
+Command: clearSUM(raidName)
+
+1. raidName = Name of the raid for which you're trying to clear the registration messsage.
+
+Removes the sign up message for raidName from it's channel, making registration inactive.
+
+Example:
+'~clearSUM trainingRaid'

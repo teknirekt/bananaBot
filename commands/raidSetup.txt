@@ -1,10 +1,10 @@
-Command: raidSetup
+Command: raidSetup(raidName, day, date, time, timezone)
 
-@param (args[0] = raidName) STRING
-@param (args[1] = day)		STRING
-@param (args[2] = date)		STRING
-@param (args[3] = time) 	STRING
-@param (args[4] = timezone) STRING
+1. raidName = Name of the raid for which you're trying to setup.
+2. day = the day the raid is set for.
+3. date = the date the raid is set for.
+4. time = the time the raid is set for.
+5. timezone = the timezone the raid is set for.
 
 Setup a raidSetup message inside the channel, deleting previous message.
 

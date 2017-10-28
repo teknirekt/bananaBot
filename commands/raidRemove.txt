@@ -1,7 +1,7 @@
-Command: raidRemove
+Command: raidRemove(raidName, discordName(officersOnly, optional))
 
-@param (args[0] = raidName) STRING
-@param (args[1] = discordName) 	STRING (officersOnly, optional)
+1. raidName = Name of the raid for which you'd like to remove yourself from.
+2. discordName = If you're trying remove another person. (officersOnly, optional)
 
 Remove author of message/discordName from raidSignUp.
 

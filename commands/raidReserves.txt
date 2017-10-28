@@ -1,7 +1,7 @@
-Command: raidReserves
+Command: raidReserves(raidName, discordName(officersOnly, optional))
 
-@param (args[0] = raidName) STRING
-@param (args[1] = discordName) 	STRING (officersOnly, optional)
+1. raidName = Name of the raid for which you'd like to be in reserves.
+2. discordName = If you're trying to put another person in reserves. (officersOnly, optional)
 
 Add author of message/discordName to the raidSignup as a reserve.
 

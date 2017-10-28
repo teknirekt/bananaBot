@@ -97,6 +97,10 @@ client.on("message", message => {
 				message.channel.send("```" + fs.readFileSync("commands/clearRL.txt", "utf8") + "```");
 				break;
 
+			case "clearSUM":
+				message.channel.send("```" + fs.readFileSync("commands/clearSUM.txt", "utf8") + "```");
+				break;
+
 			default:
 				message.channel.send("```" + fs.readFileSync("commands/commands.txt", "utf8") + "```");
 		}
@@ -111,7 +115,7 @@ client.on("message", message => {
 	*/
 	
 	if(command === prefix + "raidAdd") {
-		/* ------------------------------ RAIDADD ------------------------------
+		/*RAIDADD
 		@param (args[0] = raidName) 		STRING
 		@param (args[1] = roleIndex) 		INT
 		@param (args[2] = roleDescription) 	STRING
@@ -227,7 +231,7 @@ client.on("message", message => {
 	} else
 	
 	if(command === prefix + "raidFill") {
-		/* ------------------------------ RAIDFILL ------------------------------
+		/* RAIDFILL 
 		@param (args[0] = raidName) 	STRING
 		@param (args[1] = intervals) 	INTERVAL (atleast 1)
 		@param (args[2] = discordName)	STRING (optional)
@@ -363,7 +367,7 @@ client.on("message", message => {
 	} else
 	
 	if(command === prefix + "raidReserves") {
-		/* ------------------------------ RAIDRESERVE ------------------------------
+		/* RAIDRESERVE
 		@param (args[0] = raidName) 		STRING
 		@param (args[1] = discordName) 		STRING (optional)
 
@@ -436,7 +440,7 @@ client.on("message", message => {
 	} else
 
 	if(command === prefix + "raidRemove") {
-		/* ------------------------------ RAIDREMOVE ------------------------------
+		/* RAIDREMOVE 
 		@param (args[0] = raidName) 		STRING
 		@param (args[1] = discordName) 		STRING (optional)
 
@@ -509,7 +513,7 @@ client.on("message", message => {
 	} else
 
 	if(command === prefix + "raidSetup") {
-		/* ------------------------------ RAIDSETUP ------------------------------
+		/* RAIDSETUP 
 		@param (args[0] = raidName) 		STRING
 		@param (args[1] = day)		 		STRING
 		@param (args[2] = date)		 		STRING
@@ -519,6 +523,7 @@ client.on("message", message => {
 
 		Set up a raidSetup message inside the channel, deleting previous message.
 		*/
+
 		//First permission is checked:
 		if(!HigherPermission(message.member)) {
 			message.channel.send(message.author + ", you don't have permission to run this command.");
@@ -578,6 +583,12 @@ client.on("message", message => {
 	} else
 
 	if(command === prefix + "setRL") {
+		/* SETRL 
+		@param (args[0] = raidName) 		STRING
+		@param (args[1] = discordName) 		STRING(optional)
+		
+		Set raid leader of the raid, to be either message author/discordName.
+		*/
 		
 		//Check if user is allowed to set a raid leader.
 		if(!HigherPermission(message.member)) {
@@ -630,6 +641,11 @@ client.on("message", message => {
 	} else 
 
 	if(command === prefix + "clearRL") {
+		/* CLEARRL 
+		@param (args[0] = raidName) 		STRING
+		
+		Set raidleader to "None".
+		*/
 
 		//Check if user is allowed to clear raid leader.
 		if(!HigherPermission(message.member)) {
@@ -671,6 +687,12 @@ client.on("message", message => {
 	} else
 
 	if(command === prefix + "clearSUM") {
+		/* CLEARSUM 
+		@param (args[0] = raidName) 		STRING
+	
+		Deletes the sign up message of the raid, and logs it to logChannel, if the channel exists.
+		*/
+
 		//First permission is checked:
 		if(!HigherPermission(message.member)) {
 			message.channel.send(message.author + ", you don't have permission to run this command.");
@@ -725,9 +747,9 @@ client.on("message", message => {
 	*/
 
 	if(command === prefix + "newRaid") {
-		/* ------------------------------ NEWRAID ------------------------------
+		/* NEWRAID 
 		@param (args[0] = raidName) 		STRING
-		@param (args[1] = permission)
+		@param (args[1] = permission)		STRING (optional)	
 
 		Adds a new raid to available raids, @the channel the command was posted in.	
 		*/
@@ -792,7 +814,7 @@ client.on("message", message => {
 	} else
 
 	if(command === prefix + "deleteRaid") {
-		/* ------------------------------ DELETERAID ------------------------------
+		/* DELETERAID 
 		@param (args[0] = raidName) 		STRING
 		
 		Deletes a raid, given it exists in availableRaids.
@@ -846,7 +868,7 @@ client.on("message", message => {
 	} else
 
 	if(command === prefix + "listRaids") {
-		/* ------------------------------ LISTRAIDS ------------------------------
+		/* LISTRAIDS
 	
 		Lists all raids available to setup.
 		*/
@@ -866,7 +888,7 @@ client.on("message", message => {
 	} else
 
 	if(command === prefix + "guide") {
-		/*
+		/* GUIDE
 		Posts a guide message linking to https://github.com/XLOlsen/bananaBot
 		*/
 

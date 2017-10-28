@@ -1,4 +1,4 @@
-I am bananaBot v1.4.0
+I am bananaBot v1.4.2
 
 I'm here to help you register for raids.
 
@@ -8,7 +8,7 @@ Language	: 	JavaScript
 FrameWork 	: 	DiscordJS
 discord.js	:	v11.2.1
 nodeJS		:	v6.11.4
-botVersion	: 	v1.4.0
+botVersion	: 	v1.4.2
 Date		:	10.10.2017
 
 Author		:	XLOlsen

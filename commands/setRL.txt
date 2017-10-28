@@ -1,7 +1,7 @@
-Command: setRL
+Command: setRL(raidName, discordName(optional))
 
-@param (args[0] = raidName) STRING
-@param (args[1] = discordName) STRING (optional)
+1. raidName = name of the raid for which you're trying to set the raid leader
+2. discordName = if you're trying to set another person as the raid leader.
 
 Sets author of message/discordName as raid leader of the raid.
 

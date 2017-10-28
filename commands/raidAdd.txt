@@ -1,12 +1,12 @@
-Command: raidAdd
+Command: raidAdd(raidName, roleIndex, roleDescription, discordName(officersOnly, optional))
 
-@param (args[0] = raidName) STRING
-@param (args[1] = roleIndex) INT
-@param (args[2] = roleDescription) STRING
-@param (args[3] = discordName) STRING (officersOnly, optional)
+1. raidName = Name of the raid for which you're trying to sign up for.
+2. roleIndex = The spot # you wish to sign up for.
+3. roleDescription = What you're bringing to said spot.
+4. discordName = If you're trying to sign up another person. (officersOnly, optional)
 
 Add author of message/discordName to the specified spot at raidSignup.
-Intended for single spot signups. If you want intervals, check out raidFill.
+Intended for **single spot** signups. If you want intervals, check out raidFill.
 
 Example:
 '~raidAdd trainingRaid 7 CondiSoulbeast'
