@@ -131,10 +131,12 @@ client.on("message", message => {
 			if(HigherPermission(message.member)) {
 				message.channel.send(message.author + ", raidAdd requires 3-4 arguments.\nraidAdd(raidName, roleIndex, roleDescription, discordName(optional)).");
 			} else {
-
 				message.channel.send(message.author + ", raidAdd requires 3 arguments.\nraidAdd(raidName, roleIndex, roleDescription).");
 			}
 			return;
+		}  else if (args.length === 4 && !HigherPermission(message.member)){
+				message.channel.send(message.author + ", raidAdd requires 3 arguments.\nraidAdd(raidName, roleIndex, roleDescription).");
+				return;
 		}
 
 		//Checks if the raid exists. If not, end the command w/ helpful message.
@@ -251,6 +253,9 @@ client.on("message", message => {
 				message.channel.send(message.author + ", raidFill requires 2 arguments.\nraidFill(raidName, intervals).");
 			}
 			return;
+		} else if (args.length === 3 && !HigherPermission(message.member)){
+				message.channel.send(message.author + ", raidFill requires 2 arguments.\nraidFill(raidName, intervals).");
+				return;
 		}
 
 		var raid = CheckRaidExists(message, args[0]); //Either false or an index
@@ -380,10 +385,12 @@ client.on("message", message => {
 			if(HigherPermission(message.member)) {
 				message.channel.send(message.author + ", raidReserves requires 1 or 2 arguments.\nraidReserves(raidName, discordName(optional)).");
 			} else {
-
 				message.channel.send(message.author + ", raidReserves requires 1 argument.\nraidReserves(raidName).");
 			}
 			return;
+		}   else if (args.length === 2 && !HigherPermission(message.member)){
+				message.channel.send(message.author + ", raidReserves requires 1 argument.\nraidReserves(raidName).");
+				return;
 		}
 
 		//Checks if the raid exists. If not, end the command w/ helpful message.
@@ -453,10 +460,12 @@ client.on("message", message => {
 			if(HigherPermission(message.member)) {
 				message.channel.send(message.author + ", raidRemove requires 1 or 2 arguments.\nraidRemove(raidName, discordName(optional)).");
 			} else {
-
 				message.channel.send(message.author + ", raidRemove requires 1 argument.\nraidRemove(raidName).");
 			}
 			return;
+		} else if (args.length === 2 && !HigherPermission(message.member)){
+				message.channel.send(message.author + ", raidRemove requires 1 argument.\nraidRemove(raidName).");
+				return;
 		}
 
 		//Checks if the raid exists. If not, end the command w/ helpful message.
