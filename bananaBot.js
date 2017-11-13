@@ -12,6 +12,8 @@ const highRoles = require("./settings.json").highRoles; //The roles within your 
 const coreMembers = require("./settings.json").coreMembers; //The role of your core raid team (if any).
 const guildMembers = require("./settings.json").guildMembers; //All roles assigned to members of your guild.
 const logChannel = require("./settings.json").logChannel; //The channel where you want to log sign up messages upon removal.
+const keywordRoles = require("./settings.json").keywordRoles;
+const roleNames = require("./settings.json").roleNames;
 
 let raidData = JSON.parse(fs.readFileSync("./raidData.json", "utf8"));
 
@@ -1159,38 +1161,38 @@ function RaidSetupMessage(raid) {
 
 	Inserts info from the raid object into a String template.
 	*/
-	return ("Raid Setup: __**" + raid.name + "**__ \n" +
+	return ("Raid Setup: **" + raid.name + "** \n" +
 		"Raid Leader: " + raid.raidLeader + "\n" +
 		"Allowed to join:" + AllowedRolesToString(raid) + "\n" + 
 		raid.day + " " + raid.date + " " + raid.time + " " + raid.timezone + "\n\n" +
-		"1. Chronotank \n" +
+		"1. " + roleNames[0] + " \n" +
 		raid.signUpGraph[1].discordID + " " + raid.signUpGraph[1].flavorText + "\n \n" +
 
-		"2. Support Chrono \n" + 
+		"2. " + roleNames[1] + " \n" + 
 		raid.signUpGraph[2].discordID + " " + raid.signUpGraph[2].flavorText + "\n \n" +
 
-		"3. Druid \n" + 
+		"3. " + roleNames[2] + " \n" + 
 		raid.signUpGraph[3].discordID + " " + raid.signUpGraph[3].flavorText + "\n \n" +
 
-		"4. Druid \n" + 
+		"4. " + roleNames[3] + " \n" + 
 		raid.signUpGraph[4].discordID + " " + raid.signUpGraph[4].flavorText + "\n \n" +
 
-		"5. PS \n" + 
+		"5. " + roleNames[4] + " \n" + 
 		raid.signUpGraph[5].discordID + " " + raid.signUpGraph[5].flavorText + "\n \n" +
 
-		"6. PS \n" + 
+		"6. " + roleNames[5] + " \n" + 
 		raid.signUpGraph[6].discordID + " " + raid.signUpGraph[6].flavorText + "\n \n" +
 
-		"7. DPS/Condi DPS \n" + 
+		"7. " + roleNames[6] + " \n" + 
 		raid.signUpGraph[7].discordID + " " + raid.signUpGraph[7].flavorText + "\n \n" +
 
-		"8. DPS/Condi DPS \n" + 
+		"8. " + roleNames[7] + " \n" + 
 		raid.signUpGraph[8].discordID + " " + raid.signUpGraph[8].flavorText + "\n \n" +
 
-		"9. DPS/Condi DPS \n" + 
+		"9. " + roleNames[8] + " \n" + 
 		raid.signUpGraph[9].discordID + " " + raid.signUpGraph[9].flavorText + "\n \n" + 
 
-		"10. DPS/Condi DPS \n" + 
+		"10. " + roleNames[9] + " \n" + 
 		raid.signUpGraph[10].discordID + " " + raid.signUpGraph[10].flavorText + "\n \n" +
 
 		"Reserves:" +
@@ -1358,41 +1360,15 @@ Interval parsing from strings
 
 
 */
-//Turns "chrono", "druid", "ps", "dps", "all" => [1,2], [3,4], [5,6], [7,10], [1,10]
+//Turns "chrono", "druid", "dps", "all" => [1,2], [3], [5,6], [7,10], [1,10]
 function DefinedInterval(definedInterval) {
 	definedInterval = definedInterval.toLowerCase();
-	switch (definedInterval) {
-		case "chrono":
-			return [1,2];
-			break;
-
-		case "uba":
-			return [2];
-			break;
-
-		case "druid":
-			return [3,4];
-			break;
-
-		case "ps":
-			return [5,6];
-			break;
-
-		case "dps":
-			return [7,10];
-			break;
-
-		case "any":
-			return [1,10];
-			break;
-
-		case "all":
-			return [1,10];
-			break;
-
-		default:
-			return false;
+	for (var i = 0; i < keywordRoles.length; i++) {
+		if(definedInterval === keywordRoles[i][0]){
+			return keywordRoles[i][1];
+		}
 	}
+	return false;
 }
 
 //Turns "[1,5]" => [1, 5]
