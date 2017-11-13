@@ -76,7 +76,7 @@ client.on("message", message => {
 				break;
 
 			case "raidFill":
-				message.channel.send("```" + fs.readFileSync("commands/raidFill.txt", "utf8") + "```");
+				message.channel.send("```" + fs.readFileSync("commands/raidFill.txt", "utf8") + "\n" + raidFillHelpMessage() + "```");
 				break;
 
 			case "raidReserves":
@@ -1269,6 +1269,20 @@ function LogPreviousSignUpToLogChannel(raid, logMessage) {
 	} else {
 		return;
 	}
+}
+
+function raidFillHelpMessage() {
+	var keywordIntervalsString = "";
+	for (var i = 0; i < keywordRoles.length; i++) {
+		keywordIntervalsString += keywordRoles[i][0] + ", ";
+	}
+	keywordIntervalsString = keywordIntervalsString.slice(0, -2);
+
+	return "Valid intervals: [1], [1-3], [3-10], " + keywordIntervalsString +
+			"\n[i-j] where 0 < i <= j < 11 \n" + 
+			"[i] where 0 < i < 11 \n" + 
+			"Example:\n" +
+			"'~raidFill trainingRaid chrono+[3]+dps+[5-8]'";
 }
 
 /*
