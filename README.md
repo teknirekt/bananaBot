@@ -131,7 +131,7 @@ The formal expression for a valid interval is:
 
 This just means that intervals such as [1-3] and [8] are valid, and intervals such as [3-1] and [11] are invalid. The predetermined intervals are:
 
-```chrono```=[1-2], ```druid```=[3-4], ```ps```=[5-6], ```dps```=[7-10], ```all```=[1-10], ```any```=[1-10].
+```chrono```=[1-2], ```druid```=[3], ```warrior```=[4], ```healer```=[5], ```dps```=[6-10], ```all```=[1-10], ```any```=[1-10].
 
 And there might be a secret one aswell.
 
