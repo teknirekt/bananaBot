@@ -37,9 +37,27 @@ Open an empty file, paste in:
 	"logChannel":"YOUR_LOG_CHANNEL_ID_GOES_HERE_OR_YOU_CAN_LEAVE_IT_BLANK",
 	"highRoles":["YOUR_DISCORD_OFFICER_AND_LEADER_ROLE_NAMES_GO_HERE"],
 	"coreMembers":["YOUR_DISCORD_CORE_RAID_ROLE_NAME_GOES_HERE"],
-	"guildMembers":["YOUR_DISCORD_GUILDMEMBER_ROLE_NAME_GOES_HERE"]
+	"guildMembers":["YOUR_DISCORD_GUILDMEMBER_ROLE_NAME_GOES_HERE"],
+	"keywordRoles":["YOUR_PREDETERMINED_INTERVALS_GOES_HERE"],
+	"roleNames":["YOUR_RAID_SETUP_GOES_HERE"]
 } 
 ```
+keywordRoles being arrays with the form ["nameOfCustomInterval","customInterval"], while roleNames is the actual setup, requiring an array of 10 elements on the form ["role1", "role2", "role3", ..., "role9", "role10"].
+Example of how my settings file look: (With personal/secure fields censored)
+```
+{
+	"token":"censored",
+	"botOwner":"censored",
+	"prefix":"~",
+	"logChannel":"censored",
+	"highRoles":["Idiotic Leader", "Officers", "Master of Coin"],
+	"coreMembers":["Core Raid Members"],
+	"guildMembers":["BNN"],
+	"keywordRoles":[["chrono",[1,2]],["uba",[2]],["druid",[3]],["banners",[4]],["healer",[5]], ["dps",[6,10]], ["any",[1,10]],["all",[1,10]]],
+	"roleNames":["Chrono Tank", "Support Chrono", "Druid PS", "Warrior Banners", "Healer/DPS", "DPS", "DPS", "DPS", "DPS", "DPS"]
+}
+```
+
 Then save this file in the same folder as the other files, naming it settings.json.
 That's it! Of course, place your own unique token that you got from https://discordapp.com/developers/applications/me in the file at YOUR_TOKEN_GOES_HERE, and fill in all the other stuff you'd like to customise.
 
