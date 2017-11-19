@@ -316,7 +316,7 @@ client.on("message", message => {
 			//If interval is invalid (a string), tell user which exact interval was invalid and return.
 			if(typeof(stringIntervals) === "string") {
 				message.channel.send("\'" + stringIntervals + "\' is not a valid interval.\n" +
-					"Examples of valid intervals: [1-3], [6], " + keywordRoles[0][1] + ", " + keywordRoles[2][1] + ", " + keywordRoles[3][1] + ", " + keywordRoles[4][1] + ", " + keywordRoles[5][1] + ", " + keywordRoles[6][1] + "\n" +
+					"Examples of valid intervals: [1-3], [6], " + keywordRoles[0][0] + ", " + keywordRoles[2][0] + ", " + keywordRoles[3][0] + ", " + keywordRoles[4][0] + ", " + keywordRoles[5][0] + ", " + keywordRoles[6][0] + "\n" +
 					"" + prefix + "help raidFill");
 				return;
 			}

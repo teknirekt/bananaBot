@@ -6,10 +6,3 @@ Command: raidAdd(raidName, intervals, discordName(officersOnly, optional))
 
 Add author of message/discordName to the raidSignup as fill. Intended for **multiple** spot sign ups.
 Note: Different intervals are seperated by '+', and not spaces!
-
-Valid intervals: chrono, druid, ps, dps, all, [1], [1-3], [3-10]
-[i-j] where 0 < i <= j < 11 
-[i] where 0 < i < 11.
-
-Example:
-'~raidFill trainingRaid chrono+[3]+dps+[5-8]'
