@@ -4,7 +4,6 @@ Permission: Everyone
 
 help(commandName)
 listRaids()
-raidAdd(raidName, raidSpot, role)
 raidFill(raidName, intervals)
 raidReserves(raidName)
 raidRemove(raidName)	
@@ -14,7 +13,6 @@ Permission: Officers
 newRaid(raidName)
 deleteRaid(raidName)
 raidSetup(raidName, day, date, time, timezone)
-raidAdd(raidName, raidSpot, role, discordName)
 raidFill(raidName, intervals, discordName)
 raidReserves(raidName, discordName)
 raidRemove(raidName, discordName)
@@ -24,5 +22,4 @@ clearSUM(raidName)
 
 Note: 
 1. All commands should be executed using the prefix. 
-2. All commands are case-sensitive.
-3. All arguments are seperated by spaces.
+2. All arguments are seperated by spaces.

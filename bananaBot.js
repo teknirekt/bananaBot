@@ -35,15 +35,15 @@ client.on("message", message => {
 
 
 	//Secret test
-	if(command === prefix + "test") {
+	if(compareStringsLowerCase(command, (prefix + "test"))) {
 		console.log("Testing...");
 	} else
 
-	if(command === prefix + "cookie") {
+	if(compareStringsLowerCase(command, (prefix + "cookie"))) {
 		message.channel.send(message.author + ", thank you for the :cookie:\n Much appreciated :smiley:");
 	} else
 
-	if(command === prefix + "info") {
+	if(compareStringsLowerCase(command, (prefix + "info"))) {
 		/*------------------------------ INFO ------------------------------
 
 		Prints out info message.
@@ -51,55 +51,51 @@ client.on("message", message => {
 		message.channel.send("```" + fs.readFileSync("commands/info.txt", "utf8") + "```");
 	} else 
 	
-	if (command === prefix + "help") { 	
+	if (compareStringsLowerCase(command, (prefix + "help"))) { 	
 		/* ------------------------------ HELP ------------------------------
 		@param (args[0] = command) 		STRING
 
 		Lists all commands, or in depth explanation of specific commands.
 		*/	
-		switch (args[0]) {
+		switch (args[0].toLowerCase()) {
 
-			case "deleteRaid":
+			case "deleteraid":
 				message.channel.send("```" + fs.readFileSync("commands/deletRaid.txt", "utf8") + "```");
 				break;
 
-			case "listRaids":
+			case "listraids":
 				message.channel.send("```" + fs.readFileSync("commands/listRaids.txt", "utf8") + "```");
 				break;
 
-			case "newRaid":
+			case "newraid":
 				message.channel.send("```" + fs.readFileSync("commands/newRaid.txt", "utf8") + "```");
 				break;
 
-			case "raidAdd":
-				message.channel.send("```" + fs.readFileSync("commands/raidAdd.txt", "utf8") + "```");
-				break;
-
-			case "raidFill":
+			case "raidfill":
 				message.channel.send("```" + fs.readFileSync("commands/raidFill.txt", "utf8") + "\n" + raidFillHelpMessage() + "```");
 				break;
 
-			case "raidReserves":
+			case "raidreserves":
 				message.channel.send("```" + fs.readFileSync("commands/raidReserves.txt", "utf8") + "```");
 				break;
 
-			case "raidRemove":
+			case "raidremove":
 				message.channel.send("```" + fs.readFileSync("commands/raidRemove.txt", "utf8") + "```");
 				break;
 
-			case "raidSetup":
+			case "raidsetup":
 				message.channel.send("```" + fs.readFileSync("commands/raidSetup.txt", "utf8") + "```");
 				break;
 
-			case "setRL":
+			case "setrl":
 				message.channel.send("```" + fs.readFileSync("commands/setRL.txt", "utf8") + "```");
 				break;
 
-			case "clearRL":
+			case "clearrl":
 				message.channel.send("```" + fs.readFileSync("commands/clearRL.txt", "utf8") + "```");
 				break;
 
-			case "clearSUM":
+			case "clearsum":
 				message.channel.send("```" + fs.readFileSync("commands/clearSUM.txt", "utf8") + "```");
 				break;
 
@@ -107,6 +103,15 @@ client.on("message", message => {
 				message.channel.send("```" + fs.readFileSync("commands/commands.txt", "utf8") + "```");
 		}
 	} else
+
+	if(compareStringsLowerCase(command, (prefix + "intervals"))) {
+		var resultString = ""
+		for (var i = 0; i < keywordRoles.length; i++) {
+			resultString += "\'" + keywordRoles[i][0] + "\', ";
+		}
+		resultString = resultString.slice(0, -2);
+		message.channel.send("List of keyword intervals:\n" + resultString + ".");
+	} else 
 
 	/*
 
@@ -116,125 +121,7 @@ client.on("message", message => {
 
 	*/
 	
-	if(command === prefix + "raidAdd") {
-		/*RAIDADD
-		@param (args[0] = raidName) 		STRING
-		@param (args[1] = roleIndex) 		INT
-		@param (args[2] = roleDescription) 	STRING
-		@param (args[3] = discordName) 		STRING (optional)
-
-		Add author of message/user to the raidSignup:
-		*/
-
-		//Check if enough arguments are passed
-		if(args.length !== 3 && args.length !== 4) {
-
-			//If message author is an officer
-			if(HigherPermission(message.member)) {
-				message.channel.send(message.author + ", raidAdd requires 3-4 arguments.\nraidAdd(raidName, roleIndex, roleDescription, discordName(optional)).");
-			} else {
-				message.channel.send(message.author + ", raidAdd requires 3 arguments.\nraidAdd(raidName, roleIndex, roleDescription).");
-			}
-			return;
-		}  else if (args.length === 4 && !HigherPermission(message.member)){
-				message.channel.send(message.author + ", raidAdd requires 3 arguments.\nraidAdd(raidName, roleIndex, roleDescription).");
-				return;
-		}
-
-		//Checks if the raid exists. If not, end the command w/ helpful message.
-		var raid = CheckRaidExists(message, args[0]); //Either false or an index
-		if(!raid) {
-			return;
-		}
-
-		//Checks whether the raid was initiated in the channel the command was called. If not, tell user which channel the raid is in.
-		if(!CheckInRightChannel(message, raid)) {
-			return;
-		}
-
-		//Checks if user is permitted to signup. If not, return.
-		if(!CheckAllowedRoles(message, raid)) {
-			return;
-		}
-
-		//Check if raid registration is active for raid.
-		if(raid.currentSignupMsg === "") {
-			message.channel.send(message.author + ", registration for the raid \'" + raid.name + "\' isn't active.");
-			return;
-		}
-
-		//Get the sign up message
-		message.channel.fetchMessage(raid.currentSignupMsg).then(fetchedMsg => {
-
-			//Is message author allowed to add other users and is it a valid username?
-			if(!CanFindAndManageUser(message, args[3])) { 
-				return;
-			}
-
-			//Find out whether message author should be passed on, or the username from the argument (If any).
-			var userAlreadySigned = UserAlreadySignedReport(message, raid, args[3]);
-
-			//Checks if user is already signed up. If yes, return and tell the user.
-			if(!CheckUserAlreadySigned(message, raid, userAlreadySigned)) {
-				return;
-			}
-
-			//Checks if there are any spots left in the list/graph. If not, tell user.
-			if(!CheckAnySpotsLeft(message, raid)) {
-				return;
-			}
-
-			//Checks whether the 2nd argument is a valid spot. Should be a number i, where 0 < i < 10. If invalid, tell user.
-			if(isNaN(parseInt(args[1])) || ((parseInt(args[1]) < 1) || (parseInt(args[1]) > 10))){
-				message.channel.send(message.author + ", 2nd argument, \'" + args[1] + "\' is not a valid spot.\n" +
-					"2nd argument should be a number i, where 0 < i < 11. " + prefix + "help raidAdd");
-				return;
-			}
-
-			//Placing user in spot #0, adding additional info to the vertice, about which spot he tries to sign up to.
-			SetSourceVertex(raid.signUpGraph, [parseInt(args[1])], userAlreadySigned[1], args[2]);
-
-			//Using BFS to try and find a path from spot 0 (source vertex) to an empty spot vertex (empty spots = rolesAvailable).
-			BFS(raid.signUpGraph, raid.signUpGraph[0]);
-
-			//Sets a switchVertex to being either the empty spot vertex, or false if none exists.
-			var switchVertex = EmptySpotReachable(raid.signUpGraph, raid.rolesAvailable);
-
-			//Checks whether or not an empty spot vertex was found or not.
-			if(switchVertex) {
-				
-				//If yes, move everyone on the path one step towards the empty spot, making the wanted spot the new empty spot, which
-				 	//then can be replaced by the user wanted to sign up (vertex #0). Vertex #0 is then reset to empty values. 
-				PlaceSourceInList(raid.signUpGraph, switchVertex);
-
-				//Remove the switchVertex(the empty spot initially found using BFS) spot# from empty spots list (rolesAvailable.
-				raid.rolesAvailable.splice(raid.rolesAvailable.indexOf(switchVertex.spot), 1);
-
-				//Write to database file
-				UpdateJSON();
-
-				//Update sign up message, mentioning the user the desired spot(2nd argument), followed by the flavor text (3rd argument)
-				fetchedMsg.edit(RaidSetupMessage(raid));
-
-				//Tell user they're put on the sign up, and where they're placed.
-				message.channel.send(userAlreadySigned[1] + ", I've signed you up for spot #" + args[1] 
-					+ " in \'" + raid.name + "\'.");
-			} else {
-
-				//If a path to an empty spot can't be found, reset spot #0 (source vertex).
-				SetSourceVertex(raid.signUpGraph, [0], "", "");
-
-				//Write to JSON file.
-				UpdateJSON();
-
-				//Notice user that the bot couldn't make the spot available.
-				message.channel.send(userAlreadySigned[1] + ", I'm sorry. Spot #" + args[1] + " in \'" +
-					raid.name + "\' is currently taken.");
-			}
-		}).catch(err =>{console.log("RaidAdd:\n" + err)});
-	} else
-	
-	if(command === prefix + "raidFill") {
+	if(compareStringsLowerCase(command, (prefix + "raidFill"))) {
 		/* RAIDFILL 
 		@param (args[0] = raidName) 	STRING
 		@param (args[1] = intervals) 	INTERVAL (atleast 1)
@@ -373,7 +260,7 @@ client.on("message", message => {
 		}).catch(err => {console.log(err)});
 	} else
 	
-	if(command === prefix + "raidReserves") {
+	if(compareStringsLowerCase(command, (prefix + "raidReserves"))) {
 		/* RAIDRESERVE
 		@param (args[0] = raidName) 		STRING
 		@param (args[1] = discordName) 		STRING (optional)
@@ -448,7 +335,7 @@ client.on("message", message => {
 		}).catch(err =>{console.log("raidReserves:\n" + err)});
 	} else
 
-	if(command === prefix + "raidRemove") {
+	if(compareStringsLowerCase(command, (prefix + "raidRemove"))) {
 		/* RAIDREMOVE 
 		@param (args[0] = raidName) 		STRING
 		@param (args[1] = discordName) 		STRING (optional)
@@ -523,7 +410,7 @@ client.on("message", message => {
 		}).catch(err =>{console.log("raidRemove:\n" + err)});
 	} else
 
-	if(command === prefix + "raidSetup") {
+	if(compareStringsLowerCase(command, (prefix + "raidSetup"))) {
 		/* RAIDSETUP 
 		@param (args[0] = raidName) 		STRING
 		@param (args[1] = day)		 		STRING
@@ -593,7 +480,7 @@ client.on("message", message => {
 		}).catch(err =>{console.log("raidSetup, sendMessage:\n" + err)});
 	} else
 
-	if(command === prefix + "setRL") {
+	if(compareStringsLowerCase(command, (prefix + "setRL"))) {
 		/* SETRL 
 		@param (args[0] = raidName) 		STRING
 		@param (args[1] = discordName) 		STRING(optional)
@@ -651,7 +538,7 @@ client.on("message", message => {
 			raid.name + "\'.");
 	} else 
 
-	if(command === prefix + "clearRL") {
+	if(compareStringsLowerCase(command, (prefix + "clearRL"))) {
 		/* CLEARRL 
 		@param (args[0] = raidName) 		STRING
 		
@@ -697,7 +584,7 @@ client.on("message", message => {
 		message.channel.send("I've cleared the raid leader for \'" + raid.name + "\'.");
 	} else
 
-	if(command === prefix + "clearSUM") {
+	if(compareStringsLowerCase(command, (prefix + "clearSUM"))) {
 		/* CLEARSUM 
 		@param (args[0] = raidName) 		STRING
 	
@@ -757,7 +644,7 @@ client.on("message", message => {
 
 	*/
 
-	if(command === prefix + "newRaid") {
+	if(compareStringsLowerCase(command, (prefix + "newRaid"))) {
 		/* NEWRAID 
 		@param (args[0] = raidName) 		STRING
 		@param (args[1] = permission)		STRING (optional)	
@@ -824,7 +711,7 @@ client.on("message", message => {
 			"\nPeople who are able to join: " + (raidData[args[0]].allowedRoles.join(", ")));
 	} else
 
-	if(command === prefix + "deleteRaid") {
+	if(compareStringsLowerCase(command, (prefix + "deleteRaid"))) {
 		/* DELETERAID 
 		@param (args[0] = raidName) 		STRING
 		
@@ -848,7 +735,7 @@ client.on("message", message => {
 
 		//Check whether the raid exists or not
 		if(raidToDelete === 0 || raidToDelete) {
-			//If yes, delete it from available raids.
+			//If yes, delete 
 			raidData["availableRaids"].raids.splice(raidToDelete, 1);
 
 			//If it had a message setup, delete the message and log it in console.
@@ -878,7 +765,7 @@ client.on("message", message => {
 		}
 	} else
 
-	if(command === prefix + "listRaids") {
+	if(compareStringsLowerCase(command, (prefix + "listRaids"))) {
 		/* LISTRAIDS
 	
 		Lists all raids available to setup.
@@ -898,7 +785,7 @@ client.on("message", message => {
 		message.channel.send("Available raids are: " + RaidsAvailableToString(raidData["availableRaids"].raids));
 	} else
 
-	if(command === prefix + "guide") {
+	if(compareStringsLowerCase(command, (prefix + "guide"))) {
 		/* GUIDE
 		Posts a guide message linking to https://github.com/XLOlsen/bananaBot
 		*/
@@ -1018,18 +905,14 @@ Other functions
 
 function raidExists(raidName) {
 	/* ------------------------------ RAIDEXISTS ------------------------------
-	@Param member DISCORDJS.USER: Pass the author of the message that prompted the command.
-
-	@Return result BOOLEAN: true/false, depending on role of the member.
-
-	If the member has 1 of the high roles, true is returned. If not, false is returned.
+	
 	*/
 	if(!raidData["availableRaids"]) {
 		return false;
 	}
 
 	for(var i = 0; i < raidData["availableRaids"].raids.length; i++) {
-		if(raidData["availableRaids"].raids[i] === (raidName)) {
+		if(compareStringsLowerCase(raidData["availableRaids"].raids[i], raidName)) {
 			return i;
 		}
 	}
@@ -1201,7 +1084,7 @@ function RaidSetupMessage(raid) {
 		"The list has been reset, so please tell me whatever role you'd like to fill! \n \n" +
 
 		"If you're not familiar with the bosses please take a look at the guides in #raid-guides. I hope to see you all. Happy raiding!" + 
-		"\n(To sign up use either raidAdd/raidFill command or be reserve with raidReserves command. \n" +
+		"\n(To sign up use either raidFill command or be reserve with raidReserves command. \n" +
 		"Use " + prefix + "help command if you're in doubt.");
 }
 
@@ -1285,6 +1168,12 @@ function raidFillHelpMessage() {
 			"'~raidFill trainingRaid chrono+[3]+dps+[5-8]'";
 }
 
+function compareStringsLowerCase(string1, string2) {
+	if(string1.toLowerCase() === string2.toLowerCase()) {
+		return true
+	} else return false;
+}
+
 /*
 
 
@@ -1300,7 +1189,7 @@ function CheckRaidExists(message, raidName) {
 		message.channel.send("There currently is no signup for this raid: " + raidName);
 		return false;
 	} else {
-		return raidData[raidName];
+		return raidData[raidData["availableRaids"].raids[raid]];
 	}
 }
 

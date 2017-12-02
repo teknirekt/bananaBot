@@ -113,31 +113,15 @@ To sign up for a raid you can go through this quick checklist:
 If you're finding yourself typing the wrong name, or being in the wrong channel, the bot will let you know.
 
 You can sign up for a raid in 3 different ways. 
-	
-1. raidAdd (Single spot only, guaranteed spot)
-2. raidFill (Multiple spots, guaranteed spot)
-3. raidReserves (Backup/reserves, not guaranteed a spot) 
+
+1. raidFill (Single/multiple spot(s), guaranteed a spot)
+2. raidReserves (Backup/reserves, not guaranteed a spot) 
 
 Also when shit hits the fan/you find out you can't attend the raid even though you signed up, you can use:
 
 4. raidRemove (Removes you from the raid, whether you're add/fill/reserve)
 
-##### 2.2.1 raidAdd
-
-The command ```~raidAdd``` is intended for when you want to sign up for just 1 specific spot. 
-The command structure is as follows: 
-```raidAdd(raidName, spot, flavorText, discordName)```
-, where raidName is the name of the raid, spot is the desired spot number, flavorText is a related text (Remember: Arguments seperated by spaces! Flavor text should be 1 word), and discordName is an optional one, only allowed for officers.
-
-An example of using ```~raidAdd```: 
-
-```~raidAdd trainingRaid 7 condiSoulBeast```
-
-This will sign you up for spot #7, given it's empty, or the bot can move people around(People who signed up as fillers) to make the spot available for you.
-
-For more info, try ```~help raidAdd```.
-
-##### 2.2.2 raidFill
+##### 2.2.1 raidFill
 
 ```~raidFill``` is for when you don't mind playing multiple roles/filling multiple spots. This command uses intervals to fill for different spots, but also have some predetermined intervals by name.
 
@@ -149,7 +133,7 @@ The formal expression for a valid interval is:
 
 This just means that intervals such as [1-3] and [8] are valid, and intervals such as [3-1] and [11] are invalid. The predetermined intervals are:
 
-```chrono```=[1-2], ```druid```=[3], ```warrior```=[4], ```healer```=[5], ```dps```=[6-10], ```all```=[1-10], ```any```=[1-10].
+```chrono```=[1-2], ```druid```=[3], ```banners```=[4], ```healer```=[5], ```dps```=[6-10], ```all```=[1-10], ```any```=[1-10].
 
 And there might be a secret one aswell.
 
@@ -177,7 +161,7 @@ Instead, let us just say that the bot will find a spot for you if it's possible,
 
 For help, you can again use ```~help raidFill```.
 
-##### 2.2.3 raidReserves
+##### 2.2.2 raidReserves
 
 So the raid is full, and you really want to go? Ask an officer to setup another raid! Or, you can use ```~raidReserves```. This will add you as a backup to the raid in case somebody who signed up decides to be late/not show up anyways. This will let us know, if we can contact you in case of 'emergencies'.
 The command structure is:
@@ -192,7 +176,7 @@ This will add you as a reserve on the sign up message of the raid 'trainingRaid'
 
 For more help, check out ```~help raidReserves```
 
-##### 2.2.4 raidRemove
+##### 2.2.3 raidRemove
 
 Picture this: 
 You forgot your birthday, a huge load of homework hit your desk, your pc broke, your girlfriend spontaneously invited your in-laws for dinner... In other words, you can't attend the raid you signed up for, for some reason. Fear not! You can sign off at any time using ```~raidRemove``` command.
@@ -211,7 +195,7 @@ Same as the others. raidName is the name of the raid where you want yourself rem
 
 Example of use: ```~raidRemove trainingRaid```
 
-This will remove you from 'trainingRaid', whether you signed up using ```~raidAdd```, ```~raidFill```, or ```~raidReserves```.
+This will remove you from 'trainingRaid', whether you signed up using```~raidFill``` or ```~raidReserves```.
 
 For more help, try ```~help raidRemove```.
 
