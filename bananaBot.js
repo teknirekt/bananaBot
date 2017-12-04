@@ -1395,7 +1395,6 @@ Graph creation and manipulation
 
 
 */
-//Own implementation
 function Vertex(spot, adjecentEdges) { 
 	this.spot = spot;
 	this.discordID = "";
@@ -1406,7 +1405,7 @@ function Vertex(spot, adjecentEdges) {
 	this.parent = null;
 }
 
-//Own graph implementation specific to signUpList problem
+//Graph implementation specific to signUpList problem
 function SignUpGraph() {
 	var graph = [new Vertex(0, [0])];
 	for(var i = 1; i < 11; i++) {
