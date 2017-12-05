@@ -6,7 +6,8 @@ help(commandName)
 listRaids()
 raidFill(raidName, intervals)
 raidReserves(raidName)
-raidRemove(raidName)	
+raidRemove(raidName)
+intervals()	
 
 Permission: Officers
 

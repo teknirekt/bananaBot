@@ -56,8 +56,12 @@ client.on("message", message => {
 		@param (args[0] = command) 		STRING
 
 		Lists all commands, or in depth explanation of specific commands.
-		*/	
-		switch (args[0].toLowerCase()) {
+		*/
+		var stringToCompare = "";	
+		if(args[0]) {
+			stringToCompare = args[0].toLowerCase();
+		}
+		switch (stringToCompare) {
 
 			case "deleteraid":
 				message.channel.send("```" + fs.readFileSync("commands/deletRaid.txt", "utf8") + "```");
